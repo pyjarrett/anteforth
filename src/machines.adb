@@ -55,6 +55,9 @@ is
          when Negate =>
             Op_Negate (Self);
 
+         when Rotate =>
+            Op_Rotate (Self);
+
          when Dupe =>
             Op_Dupe (Self);
 
@@ -181,6 +184,24 @@ is
       Push (Self, -Element);
    end Op_Negate;
 
+   procedure Op_Rotate (Self : in out Machine) is
+      Element1, Element2, Element3 : Value;
+   begin
+      if Stack_Size (Self) < 3 then
+         Self.Status := Stack_Underflow;
+         return;
+      end if;
+
+      Element1 := Peek (Self, 2);
+      Element2 := Peek (Self, 1);
+      Element3 := Peek (Self, 0);
+      Pop (Self, 3);
+
+      Push (Self, Element2);
+      Push (Self, Element3);
+      Push (Self, Element1);
+   end Op_Rotate;
+
    procedure Op_Dupe (Self : in out Machine) is
    begin
       if Is_Stack_Full (Self) then
@@ -221,6 +242,8 @@ is
          return Divide;
       elsif Input = "negate" then
          return Negate;
+      elsif Input = "rot" then
+         return Rotate;
       elsif Input = "." then
          return Print;
       elsif Input = "dup" then

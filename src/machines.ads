@@ -18,6 +18,7 @@ is
       Multiply,
       Divide,
       Negate,
+      Rotate,
       Dupe,
       Print,
       Dump_Stack,
@@ -186,6 +187,20 @@ private
         others                =>
           (Stack_Size (Self) = Stack_Size (Self'Old)
            and then Peek (Self) = -Peek (Self'Old)));
+
+   procedure Op_Rotate (Self : in out Machine)
+   with
+     Global         => null,
+     Pre            => Is_Running (Self),
+     Contract_Cases =>
+       (Stack_Size (Self) < 3 =>
+          Status (Self) = Stack_Underflow
+          and then Stack_Size (Self) = Stack_Size (Self'Old),
+        others                =>
+          (Stack_Size (Self) = Stack_Size (Self'Old)
+           and then Peek (Self, 0) = Peek (Self'Old, 2)
+           and then Peek (Self, 1) = Peek (Self'Old, 0)
+           and then Peek (Self, 2) = Peek (Self'Old, 1)));
 
    procedure Op_Dupe (Self : in out Machine)
    with
