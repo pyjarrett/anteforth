@@ -6,8 +6,8 @@ is
    type Machine_Status is
      (Ok, Stack_Overflow, Stack_Underflow, Value_Out_Of_Bounds);
 
-   type Value is new Interfaces.IEEE_Float_64;
-   subtype Bounded_Value is Value range -1.0e150 .. 1.0e150;
+   type Value is new Interfaces.Integer_64;
+   subtype Bounded_Value is Value range -2**31 .. 2**31;
 
    Max_Stack_Size : constant := 1024;
    type Element_Count is new Integer range 0 .. Max_Stack_Size;
@@ -69,24 +69,16 @@ is
           and then (for all X in 0 .. Stack_Size (Self'Old) - 1
                     => Peek (Self, X + 1) = Peek (Self'Old, X)));
 
-   procedure Pop (Self : in out Machine; Element : in out Value)
-   with
-     Global         => null,
-     Contract_Cases =>
-       (Is_Stack_Empty (Self) => Status (Self) = Stack_Underflow,
-        others                =>
-          Stack_Size (Self) = Stack_Size (Self'Old) - 1
-          and then Peek (Self'Old) = Element
-          and then Is_Running (Self) = Is_Running (Self'Old));
-
    procedure Pop (Self : in out Machine; Count : Element_Count)
    with
      Global         => null,
      Contract_Cases =>
        (Stack_Size (Self) >= Count =>
-          Stack_Size (Self) = Stack_Size (Self'Old) - Count,
+          Stack_Size (Self) = Stack_Size (Self'Old) - Count
+          and then Status (Self) = Status (Self'Old),
         Stack_Size (Self) < Count  =>
-          Stack_Size (Self) = Stack_Size (Self'Old));
+          Stack_Size (Self) = Stack_Size (Self'Old)
+          and then Status (Self) = Stack_Underflow);
 
    procedure Execute (Self : in out Machine; Op : Machine_Op)
    with
@@ -108,7 +100,7 @@ private
    subtype Multiplier is Addend;
    subtype Multiplicand is Addend;
    subtype Dividend is Addend;
-   subtype Prohibited_Divisor is Value range -1.0e-4 .. 1.0e-4;
+   subtype Prohibited_Divisor is Value range 0 .. 0;
    subtype Stack_Index is Element_Count range 1 .. Max_Stack_Size;
 
    type Machine_Stack is array (Stack_Index) of Bounded_Value;

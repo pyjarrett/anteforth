@@ -16,20 +16,12 @@ is
       pragma Assert (Self.Stack (Self.Top) = Element);
    end Push;
 
-   procedure Pop (Self : in out Machine; Element : in out Value) is
-   begin
-      if Is_Stack_Empty (Self) then
-         Self.Status := Stack_Underflow;
-      else
-         Element := Peek (Self);
-         Self.Top := Self.Top - 1;
-      end if;
-   end Pop;
-
    procedure Pop (Self : in out Machine; Count : Element_Count) is
    begin
       if Stack_Size (Self) >= Count then
          Self.Top := Self.Top - Count;
+      else
+         Self.Status := Stack_Underflow;
       end if;
    end Pop;
 
@@ -205,14 +197,15 @@ is
    end Op_Dupe;
 
    procedure Op_Print (Self : in out Machine) is
-      Element : Value := 0.0;
+      Element : Value;
    begin
       if Is_Stack_Empty (Self) then
          Self.Status := Stack_Underflow;
          return;
       end if;
 
-      Pop (Self, Element);
+      Element := Peek (Self, 0);
+      Pop (Self, 1);
       Ada.Text_IO.Put_Line (Element'Image);
    end Op_Print;
 
