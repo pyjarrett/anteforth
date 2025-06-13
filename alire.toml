@@ -1,5 +1,5 @@
-name = "postfix_calc"
-description = "Postfix calculator"
+name = "anteforth"
+description = "A verified Forth Interpreter"
 version = "0.1.0-dev"
 
 authors = ["Paul Jarrett"]
@@ -9,7 +9,7 @@ licenses = "Apache-2.0"
 website = ""
 tags = []
 
-executables = ["postfix_calc"]
+executables = ["anteforth"]
 
 [build-switches]
 Development.Debug_Info = "Yes"

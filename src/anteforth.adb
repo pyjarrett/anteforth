@@ -3,11 +3,11 @@ with Ada.Text_IO;
 with Machines;
 with Scanners;
 
-procedure Postfix_Calc with SPARK_Mode => Off is
+procedure Anteforth with SPARK_Mode => Off is
    M : Machines.Machine;
    S : Scanners.Scanner;
 begin
-   Ada.Text_IO.Put_Line ("Postfix calculator");
+   Ada.Text_IO.Put_Line ("Anteforth");
    Ada.Text_IO.Put_Line ("Operations: + - * / . negate dup dump reset");
    Ada.Text_IO.New_Line;
 
@@ -69,4 +69,4 @@ begin
          end loop;
       end;
    end loop;
-end Postfix_Calc;
+end Anteforth;
