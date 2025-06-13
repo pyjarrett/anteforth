@@ -18,6 +18,7 @@ is
       Multiply,
       Divide,
       Negate,
+      Swap,
       Over,
       Rotate,
       Dupe,
@@ -188,6 +189,15 @@ private
         others                =>
           (Stack_Size (Self) = Stack_Size (Self'Old)
            and then Peek (Self) = -Peek (Self'Old)));
+
+   procedure Op_Swap (Self : in out Machine)
+   with
+     Global         => null,
+     Contract_Cases =>
+       (Stack_Size (Self) < 2 => Status (Self) = Stack_Underflow,
+        others                =>
+          Peek (Self, 0) = Peek (Self'Old, 1)
+          and then Peek (Self, 1) = Peek (Self'Old, 0));
 
    procedure Op_Over (Self : in out Machine)
    with

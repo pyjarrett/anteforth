@@ -1,5 +1,4 @@
 with Ada.Text_IO;
-with Machines;
 
 package body Machines
   with SPARK_Mode => On
@@ -55,6 +54,9 @@ is
 
          when Negate =>
             Op_Negate (Self);
+
+         when Swap =>
+            Op_Swap (Self);
 
          when Over =>
             Op_Over (Self);
@@ -188,6 +190,21 @@ is
       Push (Self, -Element);
    end Op_Negate;
 
+   procedure Op_Swap (Self : in out Machine) is
+      A, B : Value;
+   begin
+      if Stack_Size (Self) < 2 then
+         Self.Status := Stack_Underflow;
+         return;
+      end if;
+
+      A := Peek (Self, 0);
+      B := Peek (Self, 1);
+      Pop (Self, 2);
+      Push (Self, A);
+      Push (Self, B);
+   end Op_Swap;
+
    procedure Op_Over (Self : in out Machine) is
       Element : Value;
    begin
@@ -197,7 +214,7 @@ is
       end if;
 
       if Is_Stack_Full (Self) then
-         Self.Status := Machines.Stack_Overflow;
+         Self.Status := Stack_Overflow;
          return;
       end if;
 
