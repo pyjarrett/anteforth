@@ -22,6 +22,7 @@ is
       Over,
       Rotate,
       Dupe,
+      Drop,
       Print,
       Dump_Stack,
       Error,
@@ -244,6 +245,16 @@ private
           (Stack_Size (Self) = Stack_Size (Self'Old) + 1
            and then Peek (Self, 0) = Peek (Self'Old, 0)
            and then Peek (Self, 1) = Peek (Self'Old, 0)));
+
+   procedure Op_Drop (Self : in out Machine)
+   with
+     Global         => null,
+     Contract_Cases =>
+       (Is_Stack_Empty (Self) => Status (Self) = Stack_Underflow,
+        others                =>
+          Status (Self) = Status (Self'Old)
+          and then (for all X in 0 .. Stack_Size (Self) - 1
+                    => Peek (Self, X) = Peek (Self'Old, X + 1)));
 
    procedure Op_Print (Self : in out Machine)
    with

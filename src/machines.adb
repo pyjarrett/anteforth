@@ -1,4 +1,5 @@
 with Ada.Text_IO;
+with Machines;
 
 package body Machines
   with SPARK_Mode => On
@@ -66,6 +67,9 @@ is
 
          when Dupe =>
             Op_Dupe (Self);
+
+         when Drop =>
+            Op_Drop (Self);
 
          when Print =>
             Op_Print (Self);
@@ -257,6 +261,16 @@ is
       Push (Self, Peek (Self));
    end Op_Dupe;
 
+   procedure Op_Drop (Self : in out Machine) is
+   begin
+      if Is_Stack_Empty (Self) then
+         Self.Status := Machines.Stack_Underflow;
+         return;
+      end if;
+
+      Self.Top := Self.Top - 1;
+   end Op_Drop;
+
    procedure Op_Print (Self : in out Machine) is
       Element : Value;
    begin
@@ -282,8 +296,16 @@ is
          return Divide;
       elsif Input = "negate" then
          return Negate;
+      elsif Input = "swap" then
+         return Swap;
+      elsif Input = "over" then
+         return Over;
       elsif Input = "rot" then
          return Rotate;
+      elsif Input = "dupe" then
+         return Dupe;
+      elsif Input = "drop" then
+         return Drop;
       elsif Input = "." then
          return Print;
       elsif Input = "dup" then
