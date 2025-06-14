@@ -96,6 +96,11 @@ is
    function To_Machine_Op (Input : String) return Machine_Op
    with Global => null;
 
+   type Op_Procedure is access procedure (Self : in out Machine)
+   with Pre => Is_Running (Self);
+
+   Builtin_Procedures : array (Machine_Op) of Op_Procedure;
+
 private
 
    subtype Addend is Bounded_Value;

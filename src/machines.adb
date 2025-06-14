@@ -40,36 +40,13 @@ is
          return;
       end if;
 
+      if Builtin_Procedures (Op) /= null then
+         Builtin_Procedures (Op).all (Self);
+         return;
+      end if;
+
       case Op is
-         when Add =>
-            Op_Add (Self);
-
-         when Subtract =>
-            Op_Subtract (Self);
-
-         when Multiply =>
-            Op_Multiply (Self);
-
-         when Divide =>
-            Op_Divide (Self);
-
-         when Negate =>
-            Op_Negate (Self);
-
-         when Swap =>
-            Op_Swap (Self);
-
-         when Over =>
-            Op_Over (Self);
-
-         when Rotate =>
-            Op_Rotate (Self);
-
-         when Dupe =>
-            Op_Dupe (Self);
-
-         when Drop =>
-            Op_Drop (Self);
+         --  Access to subprogram with global effects is not allowed in SPARK
 
          when Print =>
             Op_Print (Self);
@@ -318,5 +295,20 @@ is
          return Error;
       end if;
    end To_Machine_Op;
+
+begin
+
+   Builtin_Procedures :=
+     [Add      => Op_Add'Access,
+      Subtract => Op_Subtract'Access,
+      Multiply => Op_Multiply'Access,
+      Divide   => Op_Divide'Access,
+      Negate   => Op_Negate'Access,
+      Swap     => Op_Swap'Access,
+      Over     => Op_Over'Access,
+      Rotate   => Op_Rotate'Access,
+      Dupe     => Op_Dupe'Access,
+      Drop     => Op_Drop'Access,
+      others   => null];
 
 end Machines;
