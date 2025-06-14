@@ -263,6 +263,7 @@ is
 
    function To_Machine_Op (Input : String) return Machine_Op is
    begin
+      -- TODO: This should be a lookup in reverse order from the most recently registered word.
       if Input = "+" then
          return Add;
       elsif Input = "-" then
@@ -296,19 +297,27 @@ is
       end if;
    end To_Machine_Op;
 
+   procedure Register (Op : Machine_Op; Name : String; Proc : Op_Procedure) is
+   begin
+      Builtin_Procedures (Op) := Proc;
+      pragma Unreferenced (Name);
+
+   -- TODO: Register the name in the string table.
+   end Register;
+
 begin
 
-   Builtin_Procedures :=
-     [Add      => Op_Add'Access,
-      Subtract => Op_Subtract'Access,
-      Multiply => Op_Multiply'Access,
-      Divide   => Op_Divide'Access,
-      Negate   => Op_Negate'Access,
-      Swap     => Op_Swap'Access,
-      Over     => Op_Over'Access,
-      Rotate   => Op_Rotate'Access,
-      Dupe     => Op_Dupe'Access,
-      Drop     => Op_Drop'Access,
-      others   => null];
+   Builtin_Procedures := [others => null];
+
+   Register (Add, "+", Op_Add'Access);
+   Register (Subtract, "-", Op_Subtract'Access);
+   Register (Multiply, "*", Op_Multiply'Access);
+   Register (Divide, "/", Op_Divide'Access);
+   Register (Negate, "negate", Op_Negate'Access);
+   Register (Swap, "swap", Op_Swap'Access);
+   Register (Over, "over", Op_Over'Access);
+   Register (Rotate, "rot", Op_Rotate'Access);
+   Register (Dupe, "dup", Op_Dupe'Access);
+   Register (Drop, "drop", Op_Drop'Access);
 
 end Machines;

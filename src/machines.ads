@@ -101,6 +101,9 @@ is
 
    Builtin_Procedures : array (Machine_Op) of Op_Procedure;
 
+   --  Creates a new built-in.
+   procedure Register (Op : Machine_Op; Name : String; Proc : Op_Procedure);
+
 private
 
    subtype Addend is Bounded_Value;
