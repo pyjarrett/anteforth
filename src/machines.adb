@@ -4,6 +4,23 @@ with Machines;
 package body Machines
   with SPARK_Mode => On
 is
+   procedure Initialize (Self : in out Machine) is
+   begin
+      Self.Word_Name_Storage := [others => ' '];
+      Self.Builtin_Procedures := [others => null];
+
+      Register (Self, Add, "+", Op_Add'Access);
+      Register (Self, Subtract, "-", Op_Subtract'Access);
+      Register (Self, Multiply, "*", Op_Multiply'Access);
+      Register (Self, Divide, "/", Op_Divide'Access);
+      Register (Self, Negate, "negate", Op_Negate'Access);
+      Register (Self, Swap, "swap", Op_Swap'Access);
+      Register (Self, Over, "over", Op_Over'Access);
+      Register (Self, Rotate, "rot", Op_Rotate'Access);
+      Register (Self, Dupe, "dup", Op_Dupe'Access);
+      Register (Self, Drop, "drop", Op_Drop'Access);
+   end Initialize;
+
    procedure Push (Self : in out Machine; Element : Bounded_Value) is
    begin
       if Is_Stack_Full (Self) then
@@ -26,7 +43,7 @@ is
       end if;
    end Pop;
 
-   procedure Execute (Self : in out Machine; Op : Machine_Op) is
+   procedure Execute (Self : in out Machine; Op : Word_Id) is
    begin
       if Is_Stopped (Self) then
          if Op = Reset then
@@ -40,8 +57,8 @@ is
          return;
       end if;
 
-      if Builtin_Procedures (Op) /= null then
-         Builtin_Procedures (Op).all (Self);
+      if Self.Builtin_Procedures (Op) /= null then
+         Self.Builtin_Procedures (Op).all (Self);
          return;
       end if;
 
@@ -74,7 +91,6 @@ is
    procedure Op_Add (Self : in out Machine) is
       Left, Right : Value;
    begin
-      pragma Assert (Is_Running (Self));
       if Stack_Size (Self) < 2 then
          Self.Status := Stack_Underflow;
          return;
@@ -261,7 +277,7 @@ is
       Ada.Text_IO.Put_Line (Element'Image);
    end Op_Print;
 
-   function To_Machine_Op (Input : String) return Machine_Op is
+   function To_Machine_Op (Input : String) return Word_Id is
    begin
       -- TODO: This should be a lookup in reverse order from the most recently registered word.
       if Input = "+" then
@@ -297,27 +313,30 @@ is
       end if;
    end To_Machine_Op;
 
-   procedure Register (Op : Machine_Op; Name : String; Proc : Op_Procedure) is
+   procedure Register
+     (Self : in out Machine;
+      Op   : Word_Id;
+      Name : String;
+      Proc : not null Op_Procedure)
+   is
+      Last_Word_Index : constant Positive := Self.Word_Name_Storage_Next;
    begin
-      Builtin_Procedures (Op) := Proc;
-      pragma Unreferenced (Name);
+      if Positive'Last - Last_Word_Index >= Self.Word_Name_Storage_Next then
+         -- Ran out of word storage.
+         return;
+      end if;
 
-   -- TODO: Register the name in the string table.
+      if Positive'Last - Name'Length + 1 >= Self.Word_Name_Storage_Next then
+         return;
+      end if;
+
+      Self.Word_Name_Storage_Next :=
+        Self.Word_Name_Storage_Next - 1 + Name'Length;
+      Self.Builtin_Procedures (Op) := Proc;
+
+      Self.Word_Name_Storage
+        (Self.Word_Name_Storage_Next .. Last_Word_Index) :=
+        Name (Name'First .. Name'Last);
+      Self.Word_Name_Storage_Next := Last_Word_Index;
    end Register;
-
-begin
-
-   Builtin_Procedures := [others => null];
-
-   Register (Add, "+", Op_Add'Access);
-   Register (Subtract, "-", Op_Subtract'Access);
-   Register (Multiply, "*", Op_Multiply'Access);
-   Register (Divide, "/", Op_Divide'Access);
-   Register (Negate, "negate", Op_Negate'Access);
-   Register (Swap, "swap", Op_Swap'Access);
-   Register (Over, "over", Op_Over'Access);
-   Register (Rotate, "rot", Op_Rotate'Access);
-   Register (Dupe, "dup", Op_Dupe'Access);
-   Register (Drop, "drop", Op_Drop'Access);
-
 end Machines;

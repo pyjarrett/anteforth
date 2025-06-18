@@ -7,6 +7,8 @@ procedure Anteforth with SPARK_Mode => Off is
    M : Machines.Machine;
    S : Scanners.Scanner;
 begin
+   Machines.Initialize (M);
+
    Ada.Text_IO.Put_Line ("Anteforth");
    Ada.Text_IO.Put_Line ("Operations: + - * / . negate dup dump reset");
    Ada.Text_IO.New_Line;
@@ -45,7 +47,7 @@ begin
                      declare
                         Lexeme    : constant String := Scanners.Image (Tk, S);
                         New_Value : Machines.Bounded_Value;
-                        Op        : Machines.Machine_Op := Machines.Error;
+                        Op        : Machines.Word_Id := Machines.Error;
                      begin
                         if Scanners.Is_Number (Lexeme) then
                            begin
