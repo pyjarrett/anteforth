@@ -6,7 +6,6 @@ package body Machines
 is
    procedure Initialize (Self : in out Machine) is
    begin
-      --  Self.Word_Name_Storage := [others => ' '];
       Register (Self, "+", Op_Add'Access);
       Register (Self, "-", Op_Subtract'Access);
       Register (Self, "*", Op_Multiply'Access);
@@ -55,10 +54,11 @@ is
          return;
       end if;
 
-      --  if Op >= Word_Id (Self.Next_Free_Word_Index) then
-      --     Self.Status := Unknown_Word;
-      --     return;
-      --  end if;
+      if Op >= Self.Words.Words_Used then
+         Ada.Text_IO.Put_Line ("Unknown word:" & Op'Image);
+         Self.Status := Unknown_Word;
+         return;
+      end if;
 
       case Op is
          --  Access to subprogram with global effects is not allowed in SPARK
@@ -81,8 +81,13 @@ is
             Ada.Text_IO.Put_Line (" (top) ");
             Ada.Text_IO.New_Line;
 
+         when Other_Machine_Ops =>
+            Ada.Text_IO.Put_Line ("Ignored:" & Op'Image);
+
          when others =>
-            Ada.Text_IO.Put_Line ("Ignored: " & Op'Image);
+            if Self.Words.Words (Op).Builtin /= null then
+               Self.Words.Words (Op).Builtin (Self);
+            end if;
       end case;
    end Execute;
 
@@ -275,72 +280,69 @@ is
       Ada.Text_IO.Put_Line (Element'Image);
    end Op_Print;
 
-   function To_Machine_Op (Input : String) return Word_Id is
+   function To_Machine_Op (Self : Machine; Input : String) return Word_Id is
    begin
-      -- TODO: This should be a lookup in reverse order from the most recently registered word.
-      if Input = "+" then
-         return Add;
-      elsif Input = "-" then
-         return Subtract;
-      elsif Input = "*" then
-         return Multiply;
-      elsif Input = "/" then
-         return Divide;
-      elsif Input = "negate" then
-         return Negate;
-      elsif Input = "swap" then
-         return Swap;
-      elsif Input = "over" then
-         return Over;
-      elsif Input = "rot" then
-         return Rotate;
-      elsif Input = "dupe" then
-         return Dupe;
-      elsif Input = "drop" then
-         return Drop;
-      elsif Input = "." then
+      if Input'Length not in Word_Length then
+         return Error;
+      end if;
+
+      if Input = "." then
          return Print;
-      elsif Input = "dup" then
-         return Dupe;
       elsif Input = "dump" then
          return Dump_Stack;
       elsif Input = "reset" then
          return Reset;
-      else
-         return Error;
       end if;
+
+      return Lookup (Self.Words, Input);
    end To_Machine_Op;
 
    procedure Register
-     (Self : in out Machine; Name : String; Proc : not null Op_Procedure)
-   is
-      --  Last_Word_Index : constant Word_Index := Self.Next_Free_Word_Index;
+     (Self : in out Machine; Name : String; Proc : not null Op_Procedure) is
    begin
-      pragma Unreferenced (Self, Name, Proc);
-   --  if Word_Index'Last - Last_Word_Index >= Self.Next_Free_Word_Index then
-   --     -- Ran out of word storage.
-   --     return;
-   --  end if;
-
-   --  if Positive'Last - Name'Length + 1
-   --    >= Positive (Self.Next_Free_Word_Index)
-   --  then
-   --     return;
-   --  end if;
-
-   --  Self.Next_Free_Word_Index := Self.Next_Free_Word_Index - 1 + Name'Length;
-   --  Self.Word_Name_Storage
-   --    (Positive (Self.Next_Free_Word_Index) .. Positive (Last_Word_Index)) :=
-   --    Name (Name'First .. Name'Last);
-   --  Self.Next_Free_Word_Index := Last_Word_Index;
-
-   --  Self.Words (Last_Word_Index) := (others => <>);
-   --  Self.Words (Last_Word_Index).Builtin := Proc;
-   --  Self.Words (Last_Word_Index).Immediate := False;
-   --  Self.Words (Last_Word_Index).Name_Start := 0;
-   --  Self.Words (Last_Word_Index).Name_Length := Name'Length;
-
-   --  Self.Words (Last_Word_Index).Data_Position := 0;
-   --  Self.Words (Last_Word_Index).Data_Position_Length := 0;
+      if Can_Allocate_Word (Self.Words)
+        and then Name'Length in Word_Length
+        and then Can_Allocate_Name (Self.Words, Word_Length (Name'Length))
+      then
+         Allocate_Word (Self.Words, Name, Proc);
+      else
+         Self.Status := Word_Space_Exceeded;
+      end if;
    end Register;
+
+   procedure Allocate_Word
+     (Table : in out Word_Table; Name : String; Proc : Op_Procedure) is
+   begin
+      declare
+         New_Word    : constant Word_Index :=
+           Word_Index (Table.Words_Used + 1);
+         Name_Length : constant Word_Length := Word_Length (Name'Length);
+      begin
+         Table.Words (New_Word).Name_Start := Table.Name_Space_Used + 1;
+         Table.Words (New_Word).Name_End :=
+           Name_Index (Table.Name_Space_Used + Name_Length);
+         Table.Words (New_Word).Builtin := Proc;
+         Table.Names
+           (Table.Name_Space_Used
+            + 1
+            .. Table.Name_Space_Used + Name_Space_Count (Name_Length)) :=
+           Name (Name'First .. Name'Last);
+         Table.Name_Space_Used :=
+           Table.Name_Space_Used + Name_Space_Count (Name_Length);
+         Table.Words_Used := Table.Words_Used + 1;
+      end;
+   end Allocate_Word;
+
+   function Lookup (Table : Word_Table; Name : String) return Word_Id is
+   begin
+      for Index in reverse Word_Index'First .. Table.Words_Used loop
+         if Table.Names
+              (Table.Words (Index).Name_Start .. Table.Words (Index).Name_End)
+           = Name
+         then
+            return Index;
+         end if;
+      end loop;
+      return Error;
+   end Lookup;
 end Machines;

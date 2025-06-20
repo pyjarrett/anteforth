@@ -25,24 +25,17 @@ is
 
    subtype Word_Length is Positive range 1 .. Max_Word_Length;
 
-   type Word_Id is new Interfaces.Unsigned_64;
-   Add        : constant Word_Id := 0;
-   Subtract   : constant Word_Id := 1;
-   Multiply   : constant Word_Id := 2;
-   Divide     : constant Word_Id := 3;
-   Negate     : constant Word_Id := 4;
-   Swap       : constant Word_Id := 5;
-   Over       : constant Word_Id := 6;
-   Rotate     : constant Word_Id := 7;
-   Dupe       : constant Word_Id := 8;
-   Drop       : constant Word_Id := 9;
-   subtype Builtin_Op is Word_Id range Add .. Drop;
-   Print      : constant Word_Id := 10;
-   Dump_Stack : constant Word_Id := 11;
+   subtype Word_Id is Positive;
+   Print                : constant Word_Id := 1;
+   Dump_Stack           : constant Word_Id := 2;
+   --  These cannot be stored as access procedures in SPARK since they have
+   --  side effects, and are not representable by other words.
    subtype Side_Effect_Machine_Op is Word_Id range Print .. Dump_Stack;
-   Error      : constant Word_Id := 12;
-   Reset      : constant Word_Id := 13;
-   subtype Error_State is Word_Id range Error .. Reset;
+   Error                : constant Word_Id := 3;
+   Reset                : constant Word_Id := 4;
+   subtype Other_Machine_Ops is Word_Id range Error .. Reset;
+   First_Custom_Word_Id : constant := Other_Machine_Ops'Last + 1;
+   subtype Word_Index is Word_Id range First_Custom_Word_Id .. Max_Words;
 
    type Machine is private;
 
@@ -111,7 +104,7 @@ is
           Is_Running (Self) and then Stack_Size (Self) = Stack_Size (Self'Old),
         others                                 => true);
 
-   function To_Machine_Op (Input : String) return Word_Id
+   function To_Machine_Op (Self : Machine; Input : String) return Word_Id
    with Global => null;
 
    type Op_Procedure is access procedure (Self : in out Machine);
@@ -136,34 +129,58 @@ private
 
    type Machine_Stack is array (Stack_Index) of Bounded_Value;
 
+   subtype Name_Space_Count is Natural range 0 .. Word_Name_Storage_Size;
+   subtype Name_Index is Name_Space_Count range 1 .. Name_Space_Count'Last;
+   subtype Word_Count is Natural range First_Custom_Word_Id .. Max_Words;
+
    type Word is record
       -- Range of the user-usable name for this word.
-      Name_Start  : Integer := 0;
-      Name_Length : Integer := 0;
+      Name_Start : Name_Index := 1;
+      Name_End   : Name_Index := 1;
 
       -- Either builtin or Data_Position is defined.
       Builtin : Op_Procedure := null;
    end record;
 
-   type Word_Index is new Positive range 1 .. Max_Words;
    type Word_Array is array (Word_Index) of Word;
-
-   subtype Name_Index is Natural range 0 .. Word_Name_Storage_Size;
 
    type Word_Table is record
       -- Character storage for user inputs for all words.
-      Name_Storage         : String (1 .. Word_Name_Storage_Size);
-      Last_Name_Index      : Name_Index := 0;
-      Next_Free_Word_Index : Word_Index := 1;
-      Words                : Word_Array;
+      Names           : String (1 .. Word_Name_Storage_Size);
+      Name_Space_Used : Name_Space_Count := 0;
+      Words           : Word_Array;
+      Words_Used      : Word_Count := First_Custom_Word_Id;
    end record;
 
    function Can_Allocate_Word (Table : Word_Table) return Boolean
-   is (Table.Last_Name_Index < Word_Name_Storage_Size);
+   is (Table.Words_Used < Max_Words);
 
    function Can_Allocate_Name
      (Table : Word_Table; Length : Word_Length) return Boolean
-   is (Table.Last_Name_Index + Length < Word_Name_Storage_Size);
+   is (Table.Name_Space_Used + Length <= Word_Name_Storage_Size);
+
+   function Contains (Table : Word_Table; Id : Word_Id) return Boolean
+   is (Id in Word_Index and then Word_Count (Id) < Table.Words_Used);
+
+   procedure Allocate_Word
+     (Table : in out Word_Table; Name : String; Proc : Op_Procedure)
+   with
+     Pre  =>
+       Can_Allocate_Word (Table)
+       and then Name'Length in Word_Length
+       and then Can_Allocate_Name (Table, Name'Length),
+     Post =>
+       Table.Words (Word_Index (Table.Words_Used)).Name_Start /= 0
+       and then Table.Words (Word_Index (Table.Words_Used)).Name_End
+                = Table.Words (Word_Index (Table.Words_Used)).Name_Start
+                  - 1
+                  + Name'Length
+       and then Table.Words_Used = Table.Words_Used'Old + 1
+       and then Table.Name_Space_Used
+                = Table.Name_Space_Used'Old + Name_Space_Count (Name'Length);
+
+   function Lookup (Table : Word_Table; Name : String) return Word_Id
+   with Pre => Name'Length in Word_Length;
 
    type Machine is record
       Status : Machine_Status := Ok;

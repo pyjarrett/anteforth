@@ -61,7 +61,7 @@ begin
                                  null;
                            end;
                         else
-                           Op := Machines.To_Machine_Op (Lexeme);
+                           Op := Machines.To_Machine_Op (M, Lexeme);
                            Machines.Execute (M, Op);
                         end if;
                      end;
