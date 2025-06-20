@@ -19,9 +19,11 @@ is
    Max_Stack_Size : constant := Element_Count'Last;
 
    --  Word configuration
-   Max_Word_Length       : constant := 16;
-   Max_Word_Name_Storage : constant := 256;
-   Max_Words             : constant := 1024;
+   Max_Word_Length        : constant := 16;
+   Word_Name_Storage_Size : constant := 256;
+   Max_Words              : constant := 1024;
+
+   subtype Word_Length is Positive range 1 .. Max_Word_Length;
 
    type Word_Id is new Interfaces.Unsigned_64;
    Add        : constant Word_Id := 0;
@@ -141,25 +143,33 @@ private
 
       -- Either builtin or Data_Position is defined.
       Builtin : Op_Procedure := null;
-
-      -- Location in storage for the interpretable elements of this word.
-      Data_Position        : Integer := 0;
-      Data_Position_Length : Integer := 0;
-
-      Immediate : Boolean := False;
    end record;
+
    type Word_Index is new Positive range 1 .. Max_Words;
    type Word_Array is array (Word_Index) of Word;
+
+   subtype Name_Index is Natural range 0 .. Word_Name_Storage_Size;
+
+   type Word_Table is record
+      -- Character storage for user inputs for all words.
+      Name_Storage         : String (1 .. Word_Name_Storage_Size);
+      Last_Name_Index      : Name_Index := 0;
+      Next_Free_Word_Index : Word_Index := 1;
+      Words                : Word_Array;
+   end record;
+
+   function Can_Allocate_Word (Table : Word_Table) return Boolean
+   is (Table.Last_Name_Index < Word_Name_Storage_Size);
+
+   function Can_Allocate_Name
+     (Table : Word_Table; Length : Word_Length) return Boolean
+   is (Table.Last_Name_Index + Length < Word_Name_Storage_Size);
 
    type Machine is record
       Status : Machine_Status := Ok;
       Stack  : Machine_Stack;
       Top    : Element_Count := 0;
-
-      -- Character storage for user inputs for all words.
-      Word_Name_Storage    : String (1 .. Max_Word_Name_Storage);
-      Next_Free_Word_Index : Word_Index := 1;
-      Words                : Word_Array;
+      Words  : Word_Table;
    end record;
 
    function Status (Self : Machine) return Machine_Status

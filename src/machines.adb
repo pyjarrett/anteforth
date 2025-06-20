@@ -6,7 +6,7 @@ package body Machines
 is
    procedure Initialize (Self : in out Machine) is
    begin
-      Self.Word_Name_Storage := [others => ' '];
+      --  Self.Word_Name_Storage := [others => ' '];
       Register (Self, "+", Op_Add'Access);
       Register (Self, "-", Op_Subtract'Access);
       Register (Self, "*", Op_Multiply'Access);
@@ -55,10 +55,10 @@ is
          return;
       end if;
 
-      if Op >= Word_Id (Self.Next_Free_Word_Index) then
-         Self.Status := Unknown_Word;
-         return;
-      end if;
+      --  if Op >= Word_Id (Self.Next_Free_Word_Index) then
+      --     Self.Status := Unknown_Word;
+      --     return;
+      --  end if;
 
       case Op is
          --  Access to subprogram with global effects is not allowed in SPARK
@@ -314,32 +314,33 @@ is
    procedure Register
      (Self : in out Machine; Name : String; Proc : not null Op_Procedure)
    is
-      Last_Word_Index : constant Word_Index := Self.Next_Free_Word_Index;
+      --  Last_Word_Index : constant Word_Index := Self.Next_Free_Word_Index;
    begin
-      if Word_Index'Last - Last_Word_Index >= Self.Next_Free_Word_Index then
-         -- Ran out of word storage.
-         return;
-      end if;
+      pragma Unreferenced (Self, Name, Proc);
+   --  if Word_Index'Last - Last_Word_Index >= Self.Next_Free_Word_Index then
+   --     -- Ran out of word storage.
+   --     return;
+   --  end if;
 
-      if Positive'Last - Name'Length + 1
-        >= Positive (Self.Next_Free_Word_Index)
-      then
-         return;
-      end if;
+   --  if Positive'Last - Name'Length + 1
+   --    >= Positive (Self.Next_Free_Word_Index)
+   --  then
+   --     return;
+   --  end if;
 
-      Self.Next_Free_Word_Index := Self.Next_Free_Word_Index - 1 + Name'Length;
-      Self.Word_Name_Storage
-        (Positive (Self.Next_Free_Word_Index) .. Positive (Last_Word_Index)) :=
-        Name (Name'First .. Name'Last);
-      Self.Next_Free_Word_Index := Last_Word_Index;
+   --  Self.Next_Free_Word_Index := Self.Next_Free_Word_Index - 1 + Name'Length;
+   --  Self.Word_Name_Storage
+   --    (Positive (Self.Next_Free_Word_Index) .. Positive (Last_Word_Index)) :=
+   --    Name (Name'First .. Name'Last);
+   --  Self.Next_Free_Word_Index := Last_Word_Index;
 
-      Self.Words (Last_Word_Index) := (others => <>);
-      Self.Words (Last_Word_Index).Builtin := Proc;
-      Self.Words (Last_Word_Index).Immediate := False;
-      Self.Words (Last_Word_Index).Name_Start := 0;
-      Self.Words (Last_Word_Index).Name_Length := Name'Length;
+   --  Self.Words (Last_Word_Index) := (others => <>);
+   --  Self.Words (Last_Word_Index).Builtin := Proc;
+   --  Self.Words (Last_Word_Index).Immediate := False;
+   --  Self.Words (Last_Word_Index).Name_Start := 0;
+   --  Self.Words (Last_Word_Index).Name_Length := Name'Length;
 
-      Self.Words (Last_Word_Index).Data_Position := 0;
-      Self.Words (Last_Word_Index).Data_Position_Length := 0;
+   --  Self.Words (Last_Word_Index).Data_Position := 0;
+   --  Self.Words (Last_Word_Index).Data_Position_Length := 0;
    end Register;
 end Machines;
