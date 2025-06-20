@@ -7,18 +7,16 @@ is
    procedure Initialize (Self : in out Machine) is
    begin
       Self.Word_Name_Storage := [others => ' '];
-      Self.Builtin_Procedures := [others => null];
-
-      Register (Self, Add, "+", Op_Add'Access);
-      Register (Self, Subtract, "-", Op_Subtract'Access);
-      Register (Self, Multiply, "*", Op_Multiply'Access);
-      Register (Self, Divide, "/", Op_Divide'Access);
-      Register (Self, Negate, "negate", Op_Negate'Access);
-      Register (Self, Swap, "swap", Op_Swap'Access);
-      Register (Self, Over, "over", Op_Over'Access);
-      Register (Self, Rotate, "rot", Op_Rotate'Access);
-      Register (Self, Dupe, "dup", Op_Dupe'Access);
-      Register (Self, Drop, "drop", Op_Drop'Access);
+      Register (Self, "+", Op_Add'Access);
+      Register (Self, "-", Op_Subtract'Access);
+      Register (Self, "*", Op_Multiply'Access);
+      Register (Self, "/", Op_Divide'Access);
+      Register (Self, "negate", Op_Negate'Access);
+      Register (Self, "swap", Op_Swap'Access);
+      Register (Self, "over", Op_Over'Access);
+      Register (Self, "rot", Op_Rotate'Access);
+      Register (Self, "dup", Op_Dupe'Access);
+      Register (Self, "drop", Op_Drop'Access);
    end Initialize;
 
    procedure Push (Self : in out Machine; Element : Bounded_Value) is
@@ -57,8 +55,8 @@ is
          return;
       end if;
 
-      if Self.Builtin_Procedures (Op) /= null then
-         Self.Builtin_Procedures (Op).all (Self);
+      if Op >= Word_Id (Self.Next_Free_Word_Index) then
+         Self.Status := Unknown_Word;
          return;
       end if;
 
@@ -314,29 +312,34 @@ is
    end To_Machine_Op;
 
    procedure Register
-     (Self : in out Machine;
-      Op   : Word_Id;
-      Name : String;
-      Proc : not null Op_Procedure)
+     (Self : in out Machine; Name : String; Proc : not null Op_Procedure)
    is
-      Last_Word_Index : constant Positive := Self.Word_Name_Storage_Next;
+      Last_Word_Index : constant Word_Index := Self.Next_Free_Word_Index;
    begin
-      if Positive'Last - Last_Word_Index >= Self.Word_Name_Storage_Next then
+      if Word_Index'Last - Last_Word_Index >= Self.Next_Free_Word_Index then
          -- Ran out of word storage.
          return;
       end if;
 
-      if Positive'Last - Name'Length + 1 >= Self.Word_Name_Storage_Next then
+      if Positive'Last - Name'Length + 1
+        >= Positive (Self.Next_Free_Word_Index)
+      then
          return;
       end if;
 
-      Self.Word_Name_Storage_Next :=
-        Self.Word_Name_Storage_Next - 1 + Name'Length;
-      Self.Builtin_Procedures (Op) := Proc;
-
+      Self.Next_Free_Word_Index := Self.Next_Free_Word_Index - 1 + Name'Length;
       Self.Word_Name_Storage
-        (Self.Word_Name_Storage_Next .. Last_Word_Index) :=
+        (Positive (Self.Next_Free_Word_Index) .. Positive (Last_Word_Index)) :=
         Name (Name'First .. Name'Last);
-      Self.Word_Name_Storage_Next := Last_Word_Index;
+      Self.Next_Free_Word_Index := Last_Word_Index;
+
+      Self.Words (Last_Word_Index) := (others => <>);
+      Self.Words (Last_Word_Index).Builtin := Proc;
+      Self.Words (Last_Word_Index).Immediate := False;
+      Self.Words (Last_Word_Index).Name_Start := 0;
+      Self.Words (Last_Word_Index).Name_Length := Name'Length;
+
+      Self.Words (Last_Word_Index).Data_Position := 0;
+      Self.Words (Last_Word_Index).Data_Position_Length := 0;
    end Register;
 end Machines;
