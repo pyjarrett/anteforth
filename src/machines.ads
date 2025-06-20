@@ -170,7 +170,8 @@ private
        and then Name'Length in Word_Length
        and then Can_Allocate_Name (Table, Name'Length),
      Post =>
-       Table.Words (Word_Index (Table.Words_Used)).Name_Start /= 0
+       Table.Words (Word_Index (Table.Words_Used)).Name_Start
+       = Table.Name_Space_Used'Old + 1
        and then Table.Words (Word_Index (Table.Words_Used)).Name_End
                 = Table.Words (Word_Index (Table.Words_Used)).Name_Start
                   - 1
