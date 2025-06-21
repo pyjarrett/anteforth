@@ -3,6 +3,12 @@ with Interfaces;
 package Machines
   with SPARK_Mode => On
 is
+   --  Machine configuration.
+   Max_Stack_Size         : constant := 1024;
+   Max_Word_Length        : constant := 16;
+   Word_Name_Storage_Size : constant := 1024;
+   Max_Words              : constant := 1024;
+
    type Machine_Status is
      (Ok,
       Stack_Overflow,
@@ -14,17 +20,9 @@ is
    type Value is new Interfaces.Integer_64;
    subtype Bounded_Value is Value range -2**31 .. 2**31;
 
-   --  Stack configuration
-   type Element_Count is new Integer range 0 .. 1024;
-   Max_Stack_Size : constant := Element_Count'Last;
-
-   --  Word configuration
-   Max_Word_Length        : constant := 16;
-   Word_Name_Storage_Size : constant := 256;
-   Max_Words              : constant := 1024;
+   type Element_Count is new Integer range 0 .. Max_Stack_Size;
 
    subtype Word_Length is Positive range 1 .. Max_Word_Length;
-
    subtype Word_Id is Positive;
    Reset : constant := 1;
    Error : constant := Positive'Last;
