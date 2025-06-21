@@ -1,5 +1,7 @@
 # anteforth
 
+![image](https://img.shields.io/badge/2022-inside-green?logo=ada&logoColor=or&logoSize=auto)
+
 An attempt to write a verified Forth interpreter.
 
 This project is a fork of [postfix_calc](https://github.com/pyjarrett/postfix_calc)
@@ -15,15 +17,16 @@ alr run
 
 ## Implemented and Verified Words
 
-* `+`, `-`, `*`, `/` - basic arithmetic operations
+* `reset` - reset any error conditions
+* `words` - prints all available words
 * `.` - pop and print the top element
-- `negate` - negate the top element
-- `over` - copy element one below the top to the top
-- `swap` - swap the top two elements
-- `rot` - rotate top 3 elements
-- `dup` - duplicate the top element
-- `dump` - dump the stack
-- `reset` - reset any error conditions
+* `.S` - dump the stack without modifying it
+* `+`, `-`, `*`, `/` - basic arithmetic operations
+* `negate` - negate the top element
+* `over` - copy element one below the top to the top
+* `swap` - swap the top two elements
+* `rot` - rotate top 3 elements
+* `dup` - duplicate the top element
 
 ## Running proofs
 
