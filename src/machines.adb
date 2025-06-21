@@ -288,7 +288,7 @@ is
 
       if Input = "." then
          return Print;
-      elsif Input = "dump" then
+      elsif Input = ".S" then
          return Dump_Stack;
       elsif Input = "reset" then
          return Reset;
