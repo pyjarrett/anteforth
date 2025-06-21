@@ -25,7 +25,7 @@ begin
       declare
          Input : constant String := Ada.Text_IO.Get_Line;
       begin
-         exit when Input = "exit" or else Input = "quit";
+         exit when Input = "bye";
 
          if Input'Length > Scanners.Max_Input_Length then
             Ada.Text_IO.Put_Line
