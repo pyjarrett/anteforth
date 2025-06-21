@@ -9,8 +9,12 @@ procedure Anteforth with SPARK_Mode => Off is
 begin
    Machines.Initialize (M);
 
+   Ada.Text_IO.Put_Line ("---------");
    Ada.Text_IO.Put_Line ("Anteforth");
-   Ada.Text_IO.Put_Line ("Operations: + - * / . negate dup dump reset");
+   Ada.Text_IO.Put_Line ("---------");
+   Ada.Text_IO.New_Line;
+   Ada.Text_IO.Put_Line ("Operations: ");
+   Machines.Print_Words (M);
    Ada.Text_IO.New_Line;
 
    loop

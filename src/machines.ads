@@ -107,11 +107,13 @@ is
      (Self : in out Machine; Name : String; Proc : not null Op_Procedure)
    with Pre => Name'Length in Word_Length;
 
+   procedure Print_Words (Self : Machine);
+
 private
 
    --  These cannot be stored as access procedures in SPARK since they have
    --  side effects, and are not representable by other words.
-   type Op_Intrinsic is (Nop, Print, Print_Stack, Clear_Error);
+   type Op_Intrinsic is (Nop, Clear_Error, Words, Print, Print_Stack);
 
    procedure Register
      (Self : in out Machine; Name : String; Intrinsic : Op_Intrinsic)

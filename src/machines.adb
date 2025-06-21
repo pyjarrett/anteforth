@@ -7,6 +7,7 @@ is
    procedure Initialize (Self : in out Machine) is
    begin
       Register (Self, "reset", Clear_Error);
+      Register (Self, "words", Words);
 
       Register (Self, ".", Print);
       Register (Self, ".S", Print_Stack);
@@ -64,6 +65,9 @@ is
          case Self.Words.Words (Op).Intrinsic is
             when Nop =>
                null;
+
+            when Words =>
+               Print_Words (Self);
 
             when Print =>
                Op_Print (Self);
@@ -315,6 +319,18 @@ is
          Self.Status := Word_Space_Exceeded;
       end if;
    end Register;
+
+   procedure Print_Words (Self : Machine) is
+   begin
+      for Id in 1 .. Self.Words.Words_Used loop
+         Ada.Text_IO.Put
+           (Self.Words.Names
+              (Self.Words.Words (Id).Name_Start
+               .. Self.Words.Words (Id).Name_End)
+            & " ");
+      end loop;
+      Ada.Text_IO.New_Line;
+   end Print_Words;
 
    procedure Allocate_Word
      (Table     : in out Word_Table;
