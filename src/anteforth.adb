@@ -47,7 +47,7 @@ begin
                      declare
                         Lexeme    : constant String := Scanners.Image (Tk, S);
                         New_Value : Machines.Bounded_Value;
-                        Op        : Machines.Word_Id := Machines.Error;
+                        Op        : Machines.Word_Id;
                      begin
                         if Scanners.Is_Number (Lexeme) then
                            begin

@@ -26,16 +26,9 @@ is
    subtype Word_Length is Positive range 1 .. Max_Word_Length;
 
    subtype Word_Id is Positive;
-   Print                : constant Word_Id := 1;
-   Dump_Stack           : constant Word_Id := 2;
-   --  These cannot be stored as access procedures in SPARK since they have
-   --  side effects, and are not representable by other words.
-   subtype Side_Effect_Machine_Op is Word_Id range Print .. Dump_Stack;
-   Error                : constant Word_Id := 3;
-   Reset                : constant Word_Id := 4;
-   subtype Other_Machine_Ops is Word_Id range Error .. Reset;
-   First_Custom_Word_Id : constant := Other_Machine_Ops'Last + 1;
-   subtype Word_Index is Word_Id range First_Custom_Word_Id .. Max_Words;
+   Reset : constant := 1;
+   Error : constant := Positive'Last;
+   subtype Word_Index is Word_Id range 1 .. Max_Words;
 
    type Machine is private;
 
@@ -114,9 +107,17 @@ is
    --  Creates a new built-in.
    procedure Register
      (Self : in out Machine; Name : String; Proc : not null Op_Procedure)
-   with Pre => Name'Length > 0 and then Name'Length <= Max_Word_Length;
+   with Pre => Name'Length in Word_Length;
 
 private
+
+   --  These cannot be stored as access procedures in SPARK since they have
+   --  side effects, and are not representable by other words.
+   type Op_Intrinsic is (Nop, Print, Print_Stack, Clear_Error);
+
+   procedure Register
+     (Self : in out Machine; Name : String; Intrinsic : Op_Intrinsic)
+   with Pre => Name'Length in Word_Length;
 
    subtype Addend is Bounded_Value;
    subtype Minuend is Addend;
@@ -131,7 +132,7 @@ private
 
    subtype Name_Space_Count is Natural range 0 .. Word_Name_Storage_Size;
    subtype Name_Index is Name_Space_Count range 1 .. Name_Space_Count'Last;
-   subtype Word_Count is Natural range First_Custom_Word_Id .. Max_Words;
+   subtype Word_Count is Natural range 0 .. Max_Words;
 
    type Word is record
       -- Range of the user-usable name for this word.
@@ -139,7 +140,8 @@ private
       Name_End   : Name_Index := 1;
 
       -- Either builtin or Data_Position is defined.
-      Builtin : Op_Procedure := null;
+      Intrinsic : Op_Intrinsic := Nop;
+      Builtin   : Op_Procedure := null;
    end record;
 
    type Word_Array is array (Word_Index) of Word;
@@ -149,7 +151,7 @@ private
       Names           : String (1 .. Word_Name_Storage_Size);
       Name_Space_Used : Name_Space_Count := 0;
       Words           : Word_Array;
-      Words_Used      : Word_Count := First_Custom_Word_Id;
+      Words_Used      : Word_Count := 0;
    end record;
 
    function Can_Allocate_Word (Table : Word_Table) return Boolean
@@ -163,7 +165,10 @@ private
    is (Id in Word_Index and then Word_Count (Id) < Table.Words_Used);
 
    procedure Allocate_Word
-     (Table : in out Word_Table; Name : String; Proc : Op_Procedure)
+     (Table     : in out Word_Table;
+      Name      : String;
+      Intrinsic : Op_Intrinsic;
+      Proc      : Op_Procedure)
    with
      Pre  =>
        Can_Allocate_Word (Table)

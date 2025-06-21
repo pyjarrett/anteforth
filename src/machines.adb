@@ -6,6 +6,11 @@ package body Machines
 is
    procedure Initialize (Self : in out Machine) is
    begin
+      Register (Self, "reset", Clear_Error);
+
+      Register (Self, ".", Print);
+      Register (Self, ".S", Print_Stack);
+
       Register (Self, "+", Op_Add'Access);
       Register (Self, "-", Op_Subtract'Access);
       Register (Self, "*", Op_Multiply'Access);
@@ -45,50 +50,47 @@ is
       if Is_Stopped (Self) then
          if Op = Reset then
             Self.Status := Ok;
-         elsif Op = Dump_Stack then
-            Ada.Text_IO.Put_Line ("Status: " & Self.Status'Image);
-            for Index in reverse 1 .. Self.Top loop
-               Ada.Text_IO.Put_Line (Self.Stack (Index)'Image);
-            end loop;
          end if;
          return;
       end if;
 
-      if Op >= Self.Words.Words_Used then
+      if Op > Self.Words.Words_Used then
          Ada.Text_IO.Put_Line ("Unknown word:" & Op'Image);
          Self.Status := Unknown_Word;
          return;
       end if;
 
-      case Op is
-         --  Access to subprogram with global effects is not allowed in SPARK
+      if Self.Words.Words (Op).Builtin = null then
+         case Self.Words.Words (Op).Intrinsic is
+            when Nop =>
+               null;
 
-         when Print =>
-            Op_Print (Self);
+            when Print =>
+               Op_Print (Self);
 
-         when Dump_Stack =>
-            Ada.Text_IO.Put_Line
-              (Self.Status'Image
-               & " : "
-               & Stack_Size (Self)'Image
-               & "/"
-               & Max_Stack_Size'Image);
-            for Index in 1 .. Self.Top loop
-               Ada.Text_IO.Put ("[ ");
-               Ada.Text_IO.Put (Self.Stack (Index)'Image);
-               Ada.Text_IO.Put (" ]");
-            end loop;
-            Ada.Text_IO.Put_Line (" (top) ");
-            Ada.Text_IO.New_Line;
+            when Print_Stack =>
+               Ada.Text_IO.Put_Line
+                 (Self.Status'Image
+                  & " : "
+                  & Stack_Size (Self)'Image
+                  & "/"
+                  & Max_Stack_Size'Image);
+               for Index in 1 .. Self.Top loop
+                  Ada.Text_IO.Put ("[ ");
+                  Ada.Text_IO.Put (Self.Stack (Index)'Image);
+                  Ada.Text_IO.Put (" ]");
+               end loop;
+               Ada.Text_IO.Put_Line (" (top) ");
+               Ada.Text_IO.New_Line;
 
-         when Other_Machine_Ops =>
-            Ada.Text_IO.Put_Line ("Ignored:" & Op'Image);
+            when Clear_Error =>
+               --  Handled above.
+               null;
+         end case;
+      else
+         Self.Words.Words (Op).Builtin (Self);
+      end if;
 
-         when others =>
-            if Self.Words.Words (Op).Builtin /= null then
-               Self.Words.Words (Op).Builtin (Self);
-            end if;
-      end case;
    end Execute;
 
    procedure Op_Add (Self : in out Machine) is
@@ -285,15 +287,6 @@ is
       if Input'Length not in Word_Length then
          return Error;
       end if;
-
-      if Input = "." then
-         return Print;
-      elsif Input = ".S" then
-         return Dump_Stack;
-      elsif Input = "reset" then
-         return Reset;
-      end if;
-
       return Lookup (Self.Words, Input);
    end To_Machine_Op;
 
@@ -304,14 +297,30 @@ is
         and then Name'Length in Word_Length
         and then Can_Allocate_Name (Self.Words, Word_Length (Name'Length))
       then
-         Allocate_Word (Self.Words, Name, Proc);
+         Allocate_Word (Self.Words, Name, Nop, Proc);
+      else
+         Self.Status := Word_Space_Exceeded;
+      end if;
+   end Register;
+
+   procedure Register
+     (Self : in out Machine; Name : String; Intrinsic : Op_Intrinsic) is
+   begin
+      if Can_Allocate_Word (Self.Words)
+        and then Name'Length in Word_Length
+        and then Can_Allocate_Name (Self.Words, Word_Length (Name'Length))
+      then
+         Allocate_Word (Self.Words, Name, Intrinsic, null);
       else
          Self.Status := Word_Space_Exceeded;
       end if;
    end Register;
 
    procedure Allocate_Word
-     (Table : in out Word_Table; Name : String; Proc : Op_Procedure) is
+     (Table     : in out Word_Table;
+      Name      : String;
+      Intrinsic : Op_Intrinsic;
+      Proc      : Op_Procedure) is
    begin
       declare
          New_Word    : constant Word_Index :=
@@ -321,6 +330,7 @@ is
          Table.Words (New_Word).Name_Start := Table.Name_Space_Used + 1;
          Table.Words (New_Word).Name_End :=
            Name_Index (Table.Name_Space_Used + Name_Length);
+         Table.Words (New_Word).Intrinsic := Intrinsic;
          Table.Words (New_Word).Builtin := Proc;
          Table.Names
            (Table.Name_Space_Used
