@@ -233,19 +233,17 @@ is
      Post =>
        (not Is_Running (V))
        or else (V.Param_Top = V'Old.Param_Top
-                --   and then Param_Peek (V'Old) in Instruction_Address
+                and then Param_Peek (V'Old) in Instruction_Address
                 and then V.Num_Instructions = V.Num_Instructions'Old + 2
-                --   and then Max_Instructions - Param_Peek (V'Old)
-                --            >= V.Instructions (Positive (Param_Peek (V'Old)))
+                and then Max_Instructions - Param_Peek (V'Old)
+                         >= V.Instructions (Positive (Param_Peek (V'Old)))
                 --   --  The jump written should be a valid IP.
-                --   and then Is_Valid_IP
-                --              (V,
-                --               --  Origin
-                --               Param_Peek (V'Old)
-                --               --  Offset
-                --               + V.Instructions (Positive (Param_Peek (V'Old))))
-                --
-                );
+                and then Is_Valid_Jump
+                           (V,
+                            --  Origin
+                            Param_Peek (V'Old)
+                            --  Offset
+                            + V.Instructions (Positive (Param_Peek (V'Old)))));
 
    procedure Op_Zero_Equal (V : in out VM)
    with
