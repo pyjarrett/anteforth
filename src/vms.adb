@@ -48,6 +48,16 @@ is
    end Dump_Param_Stack;
 
    procedure Dump_VM (V : VM) is
+      procedure Safe_Col (C : Ada.Text_IO.Count) is
+         use all type Ada.Text_IO.Count;
+      begin
+         if C > 0 and then C <= Ada.Text_IO.Line_Length then
+            Ada.Text_IO.Set_Col (C);
+         end if;
+      exception
+         when others =>
+            null;
+      end Safe_Col;
    begin
       Ada.Text_IO.Put_Line ("------ VM DUMP -------");
 
@@ -81,7 +91,7 @@ is
          if I = V.IP then
             Ada.Text_IO.Put ("-->");
          end if;
-         Ada.Text_IO.Set_Col (8);
+         Safe_Col (8);
 
          declare
             Next_Cell : constant Cell := V.Instructions (Integer (I));
@@ -91,7 +101,7 @@ is
               and then Next_Cell <= Cell (Word_Id'Last)
             then
                Ada.Text_IO.Put (Next_Cell'Image);
-               Ada.Text_IO.Set_Col (20);
+               Safe_Col (20);
                Next_Word := Word_Id (Next_Cell);
                if Next_Word <= V.Words.Words_Used then
                   Ada.Text_IO.Put
