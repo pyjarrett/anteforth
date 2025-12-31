@@ -257,9 +257,7 @@ is
           or else (Is_Running (V)
                    and then (Param_Stack_Equal_From_Bottom_Until
                                (V, V'Old, V.Param_Top'Old)
-                             and then V.Param_Top = V.Param_Top'Old + 1
-                             -- more here
-                             )));
+                             and then V.Param_Top = V.Param_Top'Old + 1)));
 
    procedure Op_Until (V : in out VM)
    with

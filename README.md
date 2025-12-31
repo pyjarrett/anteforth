@@ -50,8 +50,8 @@ terminates.
 * `=`, `>`, `<` - comparison operations
 * `0=`, `0>`, `0<` - zero comparison operations
 * `IF` - two instructions written
-* `THEN` - jump is verified to be valid
-* `ELSE`
+* `THEN`, `ELSE` - jumps are verified to be valid
+* `BEGIN`, `UNTIL`
 
 ## Running proofs
 
@@ -82,16 +82,16 @@ SPARK Analysis results        Total         Flow                              Pr
 ------------------------------------------------------------------------------------------------------------
 Data Dependencies                29           29                                    .           .          .
 Flow Dependencies                 1            1                                    .           .          .
-Initialization                   42           42                                    .           .          .
+Initialization                   43           43                                    .           .          .
 Non-Aliasing                      .            .                                    .           .          .
-Run-time Checks                 314            .           312 (CVC5 94%, Trivial 6%)           .          2
+Run-time Checks                 323            .           323 (CVC5 94%, Trivial 6%)           .          .
 Assertions                       34            .                            34 (CVC5)           .          .
-Functional Contracts            316            .    314 (CVC5 90%, Trivial 8%, Z3 2%)           .          2
-LSP Verification                 26            .                            26 (CVC5)           .          .
+Functional Contracts            339            .    339 (CVC5 91%, Trivial 8%, Z3 1%)           .          .
+LSP Verification                 28            .                            28 (CVC5)           .          .
 Termination                      56           54                             2 (CVC5)           .          .
 Concurrency                       .            .                                    .           .          .
 ------------------------------------------------------------------------------------------------------------
-Total                           818    126 (15%)                            688 (84%)           .     4 (0%)
+Total                           853    127 (15%)                            726 (85%)           .          .
 
 
 max steps used for successful proof: 1735
@@ -140,18 +140,19 @@ in unit terminal_input_buffers, 31 subprograms and packages out of 31 analyzed
   Terminal_Input_Buffers.Terminal_Input_Bufferpredicate at terminal_input_buffers.ads:191 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   Terminal_Input_Buffers.To_Number at terminal_input_buffers.ads:84 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
   Terminal_Input_Buffers.Width at terminal_input_buffers.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
-in unit vms, 47 subprograms and packages out of 47 analyzed
+in unit vms, 48 subprograms and packages out of 48 analyzed
   VMS at vms.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS."=" at vms.ads:92 flow analyzed (0 errors, 0 checks, 2 warnings and 0 pragma Assume statements) and proved (0 checks)
-  VMS.Allocate_Word at vms.ads:486 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)
+  VMS.Allocate_Word at vms.ads:485 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)
   VMS.Append_Instruction at vms.ads:230 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
-  VMS.Can_Allocate_Name at vms.ads:482 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-  VMS.Can_Allocate_Word at vms.ads:479 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  VMS.Can_Allocate_Name at vms.ads:481 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  VMS.Can_Allocate_Word at vms.ads:478 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Can_Append_Instructions at vms.ads:225 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Dump_Param_Stack at vms.ads:275 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
-  VMS.Dump_VM at vms.ads:276 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 16 checks out of 20 proved
-  VMS.Exec at vms.ads:450 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
-  VMS.Execute at vms.ads:513 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
+  VMS.Dump_VM at vms.ads:276 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  VMS.Dump_VM.Safe_Col at vms.adb:51 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  VMS.Exec at vms.ads:449 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
+  VMS.Execute at vms.ads:512 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
   VMS.FC_Address_Interpreter_Equal at vms.ads:319 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.FC_Instructions_Equal at vms.ads:315 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.FC_Words_Equal at vms.ads:312 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
@@ -161,8 +162,8 @@ in unit vms, 47 subprograms and packages out of 47 analyzed
   VMS.Is_Stopped at vms.ads:190 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Is_Valid_IP at vms.ads:217 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Is_Valid_Jump at vms.ads:221 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-  VMS.Is_Word at vms.ads:510 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-  VMS.Lookup at vms.ads:507 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  VMS.Is_Word at vms.ads:509 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  VMS.Lookup at vms.ads:506 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
   VMS.Only_Instructions_Changed at vms.ads:346 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Only_Param_Stack_Changed at vms.ads:324 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Only_Status_Changed at vms.ads:340 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
@@ -177,33 +178,34 @@ in unit vms, 47 subprograms and packages out of 47 analyzed
   VMS.Param_Stack_Equal at vms.ads:285 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Param_Stack_Equal_From_Bottom_Until at vms.ads:290 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
   VMS.Param_Stack_Size at vms.ads:369 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-  VMS.Param_Top_Print at vms.ads:433 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
-  VMS.Print_Words at vms.adb:342 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
-  VMS.Register at vms.ads:461 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
-  VMS.Register at vms.ads:470 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  VMS.Param_Top_Print at vms.ads:432 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  VMS.Print_Words at vms.adb:355 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  VMS.Register at vms.ads:460 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  VMS.Register at vms.ads:469 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
   VMS.Return_Stack_Equal at vms.ads:295 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Return_Stack_Equal_From_Bottom_Until at vms.ads:300 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
-  VMS.Run_Address_Interpreter at vms.ads:527 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and proved (26 checks)
+  VMS.Run_Address_Interpreter at vms.ads:526 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and proved (26 checks)
   VMS.Set_Instruction at vms.ads:243 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
   VMS.Step_IP at vms.ads:258 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
   VMS.Stop at vms.ads:194 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
   VMS.Word_Code at vms.ads:78 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-in unit vms-builtins, 28 subprograms and packages out of 28 analyzed
+in unit vms-builtins, 30 subprograms and packages out of 30 analyzed
   VMS.Builtins at vms-builtins.ads:1 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-  VMS.Builtins.Colon at vms-builtins.ads:169 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
-  VMS.Builtins.Comment at vms-builtins.ads:162 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  VMS.Builtins.Colon at vms-builtins.ads:170 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  VMS.Builtins.Comment at vms-builtins.ads:163 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
   VMS.Builtins.Op_Add at vms-builtins.ads:7 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
-  VMS.Builtins.Op_Ahead at vms-builtins.ads:341 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
-  VMS.Builtins.Op_Branch_If_False at vms-builtins.ads:348 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
+  VMS.Builtins.Op_Begin at vms-builtins.ads:249 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  VMS.Builtins.Op_Branch at vms-builtins.ads:366 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  VMS.Builtins.Op_Branch_If_False at vms-builtins.ads:373 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
   VMS.Builtins.Op_Divide at vms-builtins.ads:52 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
   VMS.Builtins.Op_Drop at vms-builtins.ads:135 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
   VMS.Builtins.Op_Dupe at vms-builtins.ads:119 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
-  VMS.Builtins.Op_Else at vms-builtins.ads:230 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (29 checks)
-  VMS.Builtins.Op_Equal at vms-builtins.ads:295 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
-  VMS.Builtins.Op_Exit at vms-builtins.ads:187 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
-  VMS.Builtins.Op_Greater_than at vms-builtins.ads:325 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
-  VMS.Builtins.Op_If at vms-builtins.ads:201 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
-  VMS.Builtins.Op_Less_than at vms-builtins.ads:310 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  VMS.Builtins.Op_Else at vms-builtins.ads:231 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (39 checks)
+  VMS.Builtins.Op_Equal at vms-builtins.ads:320 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  VMS.Builtins.Op_Exit at vms-builtins.ads:188 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Greater_than at vms-builtins.ads:350 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  VMS.Builtins.Op_If at vms-builtins.ads:202 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  VMS.Builtins.Op_Less_than at vms-builtins.ads:335 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
   VMS.Builtins.Op_Literal at vms-builtins.ads:146 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
   VMS.Builtins.Op_Multiply at vms-builtins.ads:38 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
   VMS.Builtins.Op_Negate at vms-builtins.ads:66 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
@@ -211,10 +213,11 @@ in unit vms-builtins, 28 subprograms and packages out of 28 analyzed
   VMS.Builtins.Op_Rotate at vms-builtins.ads:105 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
   VMS.Builtins.Op_Subtract at vms-builtins.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
   VMS.Builtins.Op_Swap at vms-builtins.ads:78 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
-  VMS.Builtins.Op_Then at vms-builtins.ads:213 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
-  VMS.Builtins.Op_Zero_Equal at vms-builtins.ads:250 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
-  VMS.Builtins.Op_Zero_Greater_than at vms-builtins.ads:280 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
-  VMS.Builtins.Op_Zero_Less_than at vms-builtins.ads:265 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
-  VMS.Builtins.Register_Builtins at vms-builtins.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (85 checks)
-  VMS.Builtins.Semicolon at vms-builtins.ads:179 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  VMS.Builtins.Op_Then at vms-builtins.ads:214 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
+  VMS.Builtins.Op_Until at vms-builtins.ads:264 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  VMS.Builtins.Op_Zero_Equal at vms-builtins.ads:275 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Zero_Greater_than at vms-builtins.ads:305 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Zero_Less_than at vms-builtins.ads:290 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Register_Builtins at vms-builtins.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (91 checks)
+  VMS.Builtins.Semicolon at vms-builtins.ads:180 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
 ```
