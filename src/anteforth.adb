@@ -21,7 +21,6 @@ procedure Anteforth with SPARK_Mode => Off is
                Ada.Text_IO.Put_Line ("Input line too long!");
             end if;
          end;
-         VMS.Dump_VM (V);
       end loop;
    end Run_REPL;
 
