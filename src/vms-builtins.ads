@@ -221,6 +221,20 @@ is
        or else (Is_Running (V)
                 and then V.Words.Words_Used = V'Old.Words.Words_Used);
 
+   procedure Recurse (V : in out VM)
+   with
+     Pre  => Is_Running (V),
+     Post =>
+       (Is_Compiling (V)
+        and then ((V.Num_Instructions'Old = Max_Instructions
+                   and then not Is_Running (V))
+                  or else (V.Num_Instructions = V.Num_Instructions'Old + 1
+                           and then Is_Running (V)
+                           and then V.Instructions
+                                      (Positive (V.Num_Instructions))
+                                    = Cell (V.Words.Words_Used))))
+       or else (not Is_Compiling (V) and then not Is_Running (V));
+
    procedure Op_Exit (V : in out VM)
    with
      Pre            => Is_Running (V),
@@ -277,13 +291,18 @@ is
        or else (V.Param_Top = V'Old.Param_Top - 1
                 and then Param_Peek (V'Old) in Instruction_Address
                 and then Max_Instructions - Param_Peek (V'Old)
-                         >= V.Instructions (Positive (Param_Peek (V'Old)))
-                --  The jump written should be a valid IP.
+                         >= V.Instructions
+                              (Positive (Param_Peek (V'Old))
+                               --  The jump written should be a valid IP.
+                              )
                 and then Is_Valid_Jump
-                           (V,
+                           (V
                             --  Origin
-                            Param_Peek (V'Old)
-                            --  Offset
+                            ,
+                            Param_Peek
+                              (V'Old
+                               --  Offset
+                              )
                             + V.Instructions (Positive (Param_Peek (V'Old)))));
 
    procedure Op_Else (V : in out VM)
@@ -295,13 +314,18 @@ is
                 and then Param_Peek (V'Old) in Instruction_Address
                 and then V.Num_Instructions = V.Num_Instructions'Old + 2
                 and then Max_Instructions - Param_Peek (V'Old)
-                         >= V.Instructions (Positive (Param_Peek (V'Old)))
-                --  The jump written should be a valid IP.
+                         >= V.Instructions
+                              (Positive (Param_Peek (V'Old))
+                               --  The jump written should be a valid IP.
+                              )
                 and then Is_Valid_Jump
-                           (V,
+                           (V
                             --  Origin
-                            Param_Peek (V'Old)
-                            --  Offset
+                            ,
+                            Param_Peek
+                              (V'Old
+                               --  Offset
+                              )
                             + V.Instructions (Positive (Param_Peek (V'Old)))));
 
    procedure Op_Begin (V : in out VM)

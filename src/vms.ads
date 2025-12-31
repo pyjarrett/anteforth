@@ -224,7 +224,7 @@ is
 
    function Can_Append_Instructions
      (V : VM; Count : Instruction_Count) return Boolean
-   is (Max_Instructions - V.Num_Instructions > Count)
+   is (Max_Instructions - V.Num_Instructions >= Count)
    with Global => null;
 
    procedure Append_Instruction (V : in out VM; Inst : Cell)

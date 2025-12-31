@@ -52,6 +52,7 @@ is
       Register (V, "IF", Builtins.Op_If'Access, Immediate => True);
       Register (V, "THEN", Builtins.Op_Then'Access, Immediate => True);
       Register (V, "ELSE", Builtins.Op_Else'Access, Immediate => True);
+      Register (V, "RECURSE", Recurse'Access, Immediate => True);
 
       Register (V, "BEGIN", Builtins.Op_Begin'Access, Immediate => True);
       Register (V, "UNTIL", Builtins.Op_Until'Access, Immediate => True);
@@ -395,6 +396,24 @@ is
          V.Status := Instruction_Space_Exceeded;
       end if;
    end Semicolon;
+
+   procedure Recurse (V : in out VM) is
+   begin
+      if not Is_Compiling (V) then
+         Stop (V, Syntax_Error, "Can only RECURSE when compiling.");
+         return;
+      end if;
+
+      if not Can_Append_Instructions (V, 1) then
+         Stop
+           (V,
+            Instruction_Space_Exceeded,
+            "No space to append RECURSE instruction.");
+         return;
+      end if;
+
+      Append_Instruction (V, Cell (V.Words.Words_Used));
+   end Recurse;
 
    procedure Op_Exit (V : in out VM) is
    begin
