@@ -429,7 +429,6 @@ is
           and then V.Param_Top = V'Old.Param_Top - Depth
           and then Param_Stack_Size (V) = Param_Stack_Size (V'Old) - Depth);
 
-   --  TODO: Should this be illegal during compiling?
    procedure Param_Top_Print (V : in out VM)
    with
      Pre            => Is_Running (V),

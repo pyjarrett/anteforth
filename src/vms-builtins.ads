@@ -150,13 +150,14 @@ is
      Contract_Cases =>
        (Is_Compiling (V)
         and then Param_Stack_Size (V) > 0
-        and then V.Num_Instructions + 2 <= Max_Instructions  =>
+        and then V.Num_Instructions + 2 <= Max_Instructions =>
           Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1,
         not Is_Compiling (V)
-        and then Param_Stack_Size (V) < Max_Param_Stack_Size =>
-          Param_Stack_Size (V) = Param_Stack_Size (V'Old) + 1,
-        --   and then V.IP = V.IP'Old + 1,
-        others                                               =>
+        and then Param_Stack_Size (V) < Max_Param_Stack_Size
+        and then V.IP /= Max_Instructions                   =>
+          Param_Stack_Size (V) = Param_Stack_Size (V'Old) + 1
+          and then V.IP = V.IP'Old + 1,
+        others                                              =>
           not Is_Running (V));
 
    procedure Comment (V : in out VM)
@@ -237,7 +238,7 @@ is
                 and then V.Num_Instructions = V.Num_Instructions'Old + 2
                 and then Max_Instructions - Param_Peek (V'Old)
                          >= V.Instructions (Positive (Param_Peek (V'Old)))
-                --   --  The jump written should be a valid IP.
+                --  The jump written should be a valid IP.
                 and then Is_Valid_Jump
                            (V,
                             --  Origin

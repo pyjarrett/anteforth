@@ -446,13 +446,6 @@ is
 
       Param_Multipop (V, 1);
       Set_Instruction (V, Origin, Target);
-
-   --  pragma Assert (Target + Origin <= V.Num_Instructions);
-   --  pragma Assert (Target in Instruction_Address);
-   --  pragma Assert (V.Instructions (Integer (Origin)) = Target);
-   --  pragma
-   --    Assert
-   --      (Is_Valid_IP (V, Cell (Origin + V.Instructions (Integer (Origin)))));
    end Op_Then;
 
    procedure Op_Else (V : in out VM) is
