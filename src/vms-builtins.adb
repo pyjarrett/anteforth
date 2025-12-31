@@ -43,7 +43,7 @@ is
       Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
       Register (V, "EXIT", Builtins.Op_Exit'Access);
 
-      Register (V, "AHEAD", Builtins.Op_Ahead'Access);
+      Register (V, "BRANCH", Builtins.Op_Branch'Access);
       Register (V, "0BRANCH", Builtins.Op_Branch_If_False'Access);
       Register (V, "IF", Builtins.Op_If'Access, Immediate => True);
       Register (V, "THEN", Builtins.Op_Then'Access, Immediate => True);
@@ -497,9 +497,9 @@ is
 
       --  Adds an unconditional branch over the else branch, to be patched when
       --  THEN is found.
-      Branch_Word := Lookup (V.Words, "AHEAD");
+      Branch_Word := Lookup (V.Words, "BRANCH");
       if not Is_Word (V, Branch_Word) then
-         Stop (V, Invalid_Operation, "Could not find AHEAD word.");
+         Stop (V, Invalid_Operation, "Could not find BRANCH word.");
          return;
       end if;
       Append_Instruction (V, Cell (Branch_Word));
@@ -612,7 +612,7 @@ is
       Param_Push (V, (if A > B then -1 else 0));
    end Op_Greater_Than;
 
-   procedure Op_Ahead (V : in out VM) is
+   procedure Op_Branch (V : in out VM) is
       Offset : constant Cell := V.Instructions (Positive (V.IP));
    begin
       if Is_Compiling (V) then
@@ -630,7 +630,7 @@ is
       else
          V.Status := Invalid_Operation;
       end if;
-   end Op_Ahead;
+   end Op_Branch;
 
    procedure Op_Branch_If_False (V : in out VM) is
       Condition : Cell := 0;

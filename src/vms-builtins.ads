@@ -337,7 +337,7 @@ is
                           then V.Params (V.Param_Top) = -1
                           else V.Params (V.Param_Top) = 0));
 
-   procedure Op_Ahead (V : in out VM)
+   procedure Op_Branch (V : in out VM)
    with
      Pre  => Is_Running (V),
      Post =>
