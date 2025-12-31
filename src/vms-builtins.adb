@@ -249,7 +249,7 @@ is
       else
          if Param_Stack_Size (V) < Max_Param_Stack_Size then
             --  IP will be pointing after the literal instruction at this point.
-            Param_Push (V, Cell (V.Instructions (Positive (V.IP))));
+            Param_Push (V, V.Instructions (Positive (V.IP)));
             Step_IP (V);
          else
             V.Status := Param_Stack_Overflow;
@@ -278,7 +278,6 @@ is
 
    procedure Colon (V : in out VM) is
       Tk : Terminal_Input_Buffers.Token;
-      use type Terminal_Input_Buffers.Token_Kind;
    begin
       if Is_Compiling (V) then
          --  Double entry into the compiling state.

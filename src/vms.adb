@@ -12,7 +12,7 @@ is
 
    procedure Append_Instruction (V : in out VM; Inst : Cell) is
    begin
-      if V.Num_Instructions >= Max_Instructions then
+      if V.Num_Instructions > Max_Instructions then
          Stop
            (V,
             Instruction_Space_Exceeded,

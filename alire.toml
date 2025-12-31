@@ -1,6 +1,6 @@
 name = "anteforth"
-description = "A verified Forth virtual machine"
-version = "0.1.0-dev"
+description = "A Forth virtual machine"
+version = "0.1.0"
 
 authors = ["Paul Jarrett"]
 maintainers = ["Paul Jarrett <jarrett.paul.young@gmail.com>"]
