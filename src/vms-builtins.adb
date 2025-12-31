@@ -45,6 +45,7 @@ is
       Register (V, ":", Builtins.Colon'Access);
       Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
       Register (V, "EXIT", Builtins.Op_Exit'Access);
+      Register (V, "?EXIT", Builtins.Op_Conditional_Exit'Access);
 
       Register (V, "BRANCH", Builtins.Op_Branch'Access);
       Register (V, "0BRANCH", Builtins.Op_Branch_If_False'Access);
@@ -423,6 +424,42 @@ is
       V.IP := V.Returns (Positive (V.Returns_Top));
       V.Returns_Top := @ - 1;
    end Op_Exit;
+
+   procedure Op_Conditional_Exit (V : in out VM) is
+      Condition : Cell;
+   begin
+      if Param_Stack_Size (V) = 0 then
+         Stop (V, Param_Stack_Underflow, "No condition to check before ?EXIT");
+         return;
+      end if;
+
+      if V.Returns_Top < 1 then
+         V.Status := Return_Stack_Underflow;
+         return;
+      end if;
+
+      if V.Returns_Top > Max_Return_Stack_Size then
+         V.Status := Return_Stack_Overflow;
+         return;
+      end if;
+
+      if V.Returns (Positive (V.Returns_Top)) not in Instruction_Address
+        or else V.Returns (Positive (V.Returns_Top)) > V.Num_Instructions
+      then
+         Stop
+           (V,
+            Invalid_Operation,
+            "Return address is not a valid instruction address.");
+         return;
+      end if;
+
+      Condition := Param_Peek (V);
+      Param_Multipop (V, 1);
+      if Condition = 0 then
+         V.IP := V.Returns (Positive (V.Returns_Top));
+         V.Returns_Top := @ - 1;
+      end if;
+   end Op_Conditional_Exit;
 
    procedure Op_If (V : in out VM) is
       Branch_Word : Word_Id;

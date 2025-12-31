@@ -236,6 +236,25 @@ is
         others                                                   =>
           not Is_Running (V));
 
+   procedure Op_Conditional_Exit (V : in out VM)
+   with
+     Pre            => Is_Running (V),
+     Contract_Cases =>
+       (Param_Stack_Size (V) > 0
+        and then V.Returns_Top > 0
+        and then V.Returns_Top <= Max_Return_Stack_Size
+        and then (V.Returns (V.Returns_Top) in Instruction_Address)
+        and then V.Returns (V.Returns_Top) <= V.Num_Instructions =>
+          (if Param_Peek (V'Old) = 0
+           then
+             (V.IP = V'Old.Returns (V'Old.Returns_Top)
+              and then Return_Stack_Equal_From_Bottom_Until
+                         (V, V'Old, V.Returns_Top)
+              and then V.Returns_Top = V.Returns_Top'Old - 1)
+           else (V.IP = V.IP'Old)),
+        others                                                   =>
+          not Is_Running (V));
+
    --  "IF" adds a branch and an offset instruction, pushing the location of the
    --  offset onto the parameter stack.
    procedure Op_If (V : in out VM)
