@@ -38,6 +38,8 @@ is
       Register (V, "DROP", Builtins.Op_Drop'Access);
       Register (V, "LITERAL", Builtins.Op_Literal'Access);
 
+      Register (V, ">R", Builtins.Op_Push_To_Return_Stack'Access);
+
       Register (V, "(", Builtins.Comment'Access, Immediate => True);
       Register (V, ":", Builtins.Colon'Access);
       Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
@@ -231,6 +233,29 @@ is
       V.Param_Top := V.Param_Top - 1;
    end Op_Drop;
 
+   procedure Op_Push_To_Return_Stack (V : in out VM) is
+   begin
+      if Param_Stack_Size (V) = 0 then
+         Stop
+           (V,
+            Param_Stack_Underflow,
+            "Cannot move to return stack, parameter stack is empty.");
+         return;
+      end if;
+
+      if Return_Stack_Size (V) = Max_Return_Stack_Size then
+         Stop
+           (V,
+            Return_Stack_Overflow,
+            "Cannot move to return stack, return stack is full.");
+         return;
+      end if;
+
+      V.Returns_Top := @ + 1;
+      V.Returns (V.Returns_Top) := Param_Peek (V);
+      Param_Multipop (V, 1);
+   end Op_Push_To_Return_Stack;
+
    procedure Op_Literal (V : in out VM) is
       Value : Cell := 0;
    begin
@@ -361,6 +386,16 @@ is
 
       pragma Assert (V.Returns_Top >= 1);
       pragma Assert (V.Returns_Top <= Max_Return_Stack_Size);
+
+      if V.Returns (Positive (V.Returns_Top)) not in Instruction_Address
+        or else V.Returns (Positive (V.Returns_Top)) > V.Num_Instructions
+      then
+         Stop
+           (V,
+            Invalid_Operation,
+            "Return address is not a valid instruction address.");
+         return;
+      end if;
 
       V.IP := V.Returns (Positive (V.Returns_Top));
       V.Returns_Top := @ - 1;

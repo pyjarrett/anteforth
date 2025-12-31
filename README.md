@@ -52,6 +52,7 @@ terminates.
 * `IF` - two instructions written
 * `THEN`, `ELSE` - jumps are verified to be valid
 * `BEGIN`, `UNTIL`
+* `>R`, `R>`
 
 ## Running proofs
 

@@ -153,7 +153,7 @@ is
       Params : Cell_Array (1 .. Max_Param_Stack_Size) := [others => 0];
 
       --  Index of jump-back positions in the instruction list.
-      Returns     : Instruction_Array (1 .. Max_Return_Stack_Size) :=
+      Returns     : Cell_Array (1 .. Max_Return_Stack_Size) :=
         [others => 1];  -- TODO: Maybe use an "INVALID instruction"
       Returns_Top : Return_Count := 0;
 
@@ -440,6 +440,9 @@ is
           and then Only_Param_Stack_Changed (V, V'Old)
           and then Param_Stack_Equal_From_Bottom_Until (V, V'Old, V.Param_Top)
           and then V.Param_Top = V'Old.Param_Top - 1);
+
+   function Return_Stack_Size (V : VM) return Param_Count
+   is (V.Returns_Top);
 
    ---------------------------------------------------------------------------
    --  User visible operations

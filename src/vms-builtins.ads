@@ -143,6 +143,24 @@ is
           and then (for all X in 0 .. Param_Stack_Size (V) - 1 =>
                       Param_Peek (V, X) = Param_Peek (V'Old, X + 1)));
 
+   procedure Op_Push_To_Return_Stack (V : in out VM)
+   with
+     Global => null,
+     Pre    => Is_Running (V),
+     Post   =>
+       (Return_Stack_Size (V'Old) = Max_Return_Stack_Size
+        and then not Is_Running (V))
+       or else (Param_Stack_Size (V'Old) = 0 and then not Is_Running (V))
+       or else (Is_Running (V)
+                and then V.Param_Top = V.Param_Top'Old - 1
+                and then V.Returns_Top = V.Returns_Top'Old + 1
+                and then V.Returns (V.Returns_Top)
+                         = V'Old.Params (V.Param_Top'Old)
+                and then Param_Stack_Equal_From_Bottom_Until
+                           (V, V'Old, V.Param_Top)
+                and then Return_Stack_Equal_From_Bottom_Until
+                           (V, V'Old, V.Returns_Top'Old));
+
    procedure Op_Literal (V : in out VM)
    with
      Global         => null,
@@ -189,12 +207,15 @@ is
    with
      Pre            => Is_Running (V),
      Contract_Cases =>
-       (V.Returns_Top > 0 and then V.Returns_Top <= Max_Return_Stack_Size =>
+       (V.Returns_Top > 0
+        and then V.Returns_Top <= Max_Return_Stack_Size
+        and then (V.Returns (V.Returns_Top) in Instruction_Address)
+        and then V.Returns (V.Returns_Top) <= V.Num_Instructions =>
           V.IP = V'Old.Returns (V'Old.Returns_Top)
           and then Return_Stack_Equal_From_Bottom_Until
                      (V, V'Old, V.Returns_Top)
           and then V.Returns_Top = V.Returns_Top'Old - 1,
-        others                                                            =>
+        others                                                   =>
           not Is_Running (V));
 
    --  "IF" adds a branch and an offset instruction, pushing the location of the
