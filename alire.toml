@@ -1,13 +1,13 @@
 name = "anteforth"
-description = "A verified Forth Interpreter"
+description = "A verified Forth virtual machine"
 version = "0.1.0-dev"
 
 authors = ["Paul Jarrett"]
 maintainers = ["Paul Jarrett <jarrett.paul.young@gmail.com>"]
 maintainers-logins = ["pyjarrett"]
-licenses = "Apache-2.0"
+licenses = "GPL-3.0-or-later"
 website = ""
-tags = []
+tags = ["forth","vm","spark"]
 
 executables = ["anteforth"]
 
