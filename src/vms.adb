@@ -51,7 +51,10 @@ is
       procedure Safe_Col (C : Ada.Text_IO.Count) is
          use all type Ada.Text_IO.Count;
       begin
-         if C > 0 and then C <= Ada.Text_IO.Line_Length then
+         if C > 0
+           and then (C <= Ada.Text_IO.Line_Length
+                     or else Ada.Text_IO.Line_Length = 0)
+         then
             Ada.Text_IO.Set_Col (C);
          end if;
       exception
@@ -462,16 +465,18 @@ is
 
             Next_Word := Word_Id (Next_Inst);
             if Is_Word (V, Next_Word) then
+               --  Left here for debugging, especially proofs which need to
+               --  verify jumps.
                --  if Next_Word <= V.Words.Words_Used then
-               --  Dump_Param_Stack (V);
-               --  Ada.Text_IO.Put
-               --    ("Executing: "
-               --     & V.IP'Image
-               --     & "  "
-               --     & V.Words.Names
-               --         (V.Words.Words (Next_Word).Name_Start
-               --          .. V.Words.Words (Next_Word).Name_End));
-               --  Ada.Text_IO.New_Line;
+               --     Dump_Param_Stack (V);
+               --     Ada.Text_IO.Put
+               --       ("Executing: "
+               --        & V.IP'Image
+               --        & "  "
+               --        & V.Words.Names
+               --            (V.Words.Words (Next_Word).Name_Start
+               --             .. V.Words.Words (Next_Word).Name_End));
+               --     Ada.Text_IO.New_Line;
                --  end if;
 
                --  IP could run off the end of the instruction array.  If the

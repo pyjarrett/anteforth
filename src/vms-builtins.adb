@@ -48,6 +48,9 @@ is
       Register (V, "IF", Builtins.Op_If'Access, Immediate => True);
       Register (V, "THEN", Builtins.Op_Then'Access, Immediate => True);
       Register (V, "ELSE", Builtins.Op_Else'Access, Immediate => True);
+
+      Register (V, "BEGIN", Builtins.Op_Begin'Access, Immediate => True);
+      Register (V, "UNTIL", Builtins.Op_Until'Access, Immediate => True);
    end Register_Builtins;
 
    procedure Op_Add (V : in out VM) is
@@ -531,6 +534,76 @@ is
              (V, Cell (Origin + V.Instructions (Integer (Origin)))));
    end Op_Else;
 
+   procedure Op_Begin (V : in out VM) is
+   begin
+      if not Is_Compiling (V) then
+         Stop
+           (V, Invalid_Operation, "BEGIN can only be used while compiling.");
+         return;
+      end if;
+
+      if Param_Stack_Size (V) = Max_Param_Stack_Size then
+         Stop
+           (V,
+            Param_Stack_Overflow,
+            "Cannot push jump location, param stack is full.");
+         return;
+      end if;
+
+      Param_Push (V, V.Num_Instructions);
+   end Op_Begin;
+
+   procedure Op_Until (V : in out VM) is
+      Target      : Cell := 0;
+      Branch_Word : Word_Id;
+   begin
+      if not Is_Compiling (V) then
+         Stop
+           (V, Invalid_Operation, "UNTIL can only be used while compiling.");
+         return;
+      end if;
+
+      if Param_Stack_Size (V) = 0 then
+         Stop
+           (V,
+            Param_Stack_Underflow,
+            "No jump back address was written to stack.");
+         return;
+      end if;
+
+      Param_Pop (V, Target);
+
+      --  Adds a loopback branch if the loop condition is not met.
+      Branch_Word := Lookup (V.Words, "0BRANCH");
+      if not Is_Word (V, Branch_Word) then
+         Stop (V, Invalid_Operation, "Could not find 0BRANCH word.");
+         return;
+      end if;
+
+      if Max_Instructions - 2 < V.Num_Instructions then
+         Stop
+           (V,
+            Instruction_Space_Exceeded,
+            "No space to add loop back branch.");
+         return;
+      end if;
+
+      Append_Instruction (V, Cell (Branch_Word));
+
+      if Target - V.Num_Instructions < Cell'First then
+         Stop
+           (V,
+            Invalid_Operation,
+            "Backwards jump is further than number of previous instructions: "
+            & Target'Image
+            & " vs "
+            & V.Num_Instructions'Image);
+         return;
+      end if;
+
+      Append_Instruction (V, Target - V.Num_Instructions);
+   end Op_Until;
+
    procedure Op_Zero_Equal (V : in out VM) is
       Value : Cell;
    begin
@@ -641,12 +714,6 @@ is
          return;
       end if;
 
-      if Offset not in Instruction_Address then
-         Stop
-           (V, Invalid_Operation, "Jump offset is not an instruction address");
-         return;
-      end if;
-
       if Param_Stack_Size (V) = 0 then
          Stop (V, Param_Stack_Underflow, "No condition to pop from stack.");
          return;
@@ -655,7 +722,7 @@ is
 
       if Max_Instructions - Offset >= V.IP and then V.IP + Offset >= 1 then
          if Condition = Cell_False then
-            V.IP := @ + Instruction_Address (Offset);
+            V.IP := Instruction_Address (Cell (@) + Offset);
          else
             --  No branch, but still need to skip the distance cell.
             Step_IP (V);

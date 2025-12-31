@@ -246,6 +246,32 @@ is
                             --  Offset
                             + V.Instructions (Positive (Param_Peek (V'Old)))));
 
+   procedure Op_Begin (V : in out VM)
+   with
+     Pre            => Is_Running (V),
+     Contract_Cases =>
+       (not Is_Compiling (V) => not Is_Running (V),
+        Is_Compiling (V)     =>
+          (Param_Stack_Size (V) = Max_Param_Stack_Size
+           and then not Is_Running (V))
+          or else (Is_Running (V)
+                   and then (Param_Stack_Equal_From_Bottom_Until
+                               (V, V'Old, V.Param_Top'Old)
+                             and then V.Param_Top = V.Param_Top'Old + 1
+                             -- more here
+                             )));
+
+   procedure Op_Until (V : in out VM)
+   with
+     Pre  => Is_Running (V),
+     Post =>
+       (not Is_Running (V)
+        or else (Is_Compiling (V)
+                 and then Param_Stack_Size (V'Old) > 0
+                 and then Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1
+                 and then Max_Instructions - 2 >= V.Num_Instructions'Old
+                 and then V.Num_Instructions = V.Num_Instructions'Old + 2));
+
    procedure Op_Zero_Equal (V : in out VM)
    with
      Pre  => Is_Running (V),
