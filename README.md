@@ -47,6 +47,7 @@ terminates.
 * `:` - begin a word definition
 * `;` - terminate a definition
 * `EXIT` - return from a function definition
+* `?EXIT` - conditional exit (returns when data stack top is 0)
 * `=`, `>`, `<` - comparison operations
 * `0=`, `0>`, `0<` - zero comparison operations
 * `IF` - two instructions written
