@@ -39,6 +39,7 @@ is
       Register (V, "LITERAL", Builtins.Op_Literal'Access);
 
       Register (V, ">R", Builtins.Op_Push_To_Return_Stack'Access);
+      Register (V, "R>", Builtins.Op_Push_From_Return_Stack'Access);
 
       Register (V, "(", Builtins.Comment'Access, Immediate => True);
       Register (V, ":", Builtins.Colon'Access);
@@ -255,6 +256,28 @@ is
       V.Returns (V.Returns_Top) := Param_Peek (V);
       Param_Multipop (V, 1);
    end Op_Push_To_Return_Stack;
+
+   procedure Op_Push_From_Return_Stack (V : in out VM) is
+   begin
+      if Return_Stack_Size (V) = 0 then
+         Stop
+           (V,
+            Param_Stack_Underflow,
+            "Cannot move to param stack, return stack is empty.");
+         return;
+      end if;
+
+      if Param_Stack_Size (V) = Max_Param_Stack_Size then
+         Stop
+           (V,
+            Return_Stack_Overflow,
+            "Cannot move to param stack, param stack is full.");
+         return;
+      end if;
+
+      Param_Push (V, V.Returns (V.Returns_Top));
+      V.Returns_Top := @ - 1;
+   end Op_Push_From_Return_Stack;
 
    procedure Op_Literal (V : in out VM) is
       Value : Cell := 0;

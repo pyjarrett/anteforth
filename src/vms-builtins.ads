@@ -161,6 +161,24 @@ is
                 and then Return_Stack_Equal_From_Bottom_Until
                            (V, V'Old, V.Returns_Top'Old));
 
+   procedure Op_Push_From_Return_Stack (V : in out VM)
+   with
+     Global => null,
+     Pre    => Is_Running (V),
+     Post   =>
+       (Param_Stack_Size (V'Old) = Max_Param_Stack_Size
+        and then not Is_Running (V))
+       or else (Return_Stack_Size (V'Old) = 0 and then not Is_Running (V))
+       or else (Is_Running (V)
+                and then V.Param_Top = V.Param_Top'Old + 1
+                and then V.Returns_Top = V.Returns_Top'Old - 1
+                and then V'Old.Returns (V.Returns_Top'Old)
+                         = V.Params (V.Param_Top)
+                and then Param_Stack_Equal_From_Bottom_Until
+                           (V, V'Old, V.Param_Top'Old)
+                and then Return_Stack_Equal_From_Bottom_Until
+                           (V, V'Old, V.Returns_Top));
+
    procedure Op_Literal (V : in out VM)
    with
      Global         => null,
