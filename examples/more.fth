@@ -1,0 +1,2 @@
+: MORE 1 + ;
+10 MORE .S CR

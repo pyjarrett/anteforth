@@ -1,0 +1,7 @@
+: BAR 0= IF .S THEN ;
+: FOO 0= IF 1 ELSE 2 THEN ;
+
+123 11 BAR
+456 0 BAR CR
+0 FOO . CR
+1 FOO . CR
