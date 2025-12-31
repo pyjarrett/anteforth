@@ -23,6 +23,8 @@ alr run --args="myfile.fth"
 
 ## Properties
 
+This is a single cell Forth, which only operates on 32-bit integers.
+
 The virtual machine will verify that only valid words are execute.  Allocations
 for words and names for words will always be valid, as will all instructions
 written during compilation.
@@ -32,6 +34,10 @@ behaviors are proved, such as that the terminal input buffer subprograms always
 terminates.
 
 ## Implemented and Verified Words
+
+Some words have their compile-time behavior checked and prevent introducing
+errors (like bad jumps), while others ensure that all errors are caught
+at runtime.
 
 * `RESET` - reset any error conditions
 * `WORDS` - prints all available words
@@ -53,7 +59,8 @@ terminates.
 * `IF` - two instructions written
 * `THEN`, `ELSE` - jumps are verified to be valid
 * `BEGIN`, `UNTIL`
-* `>R`, `R>`
+* `>R`, `R>` - catchs stack overflow/underflow
+* `RECURSE` - verifies instruction to current word is written
 
 ## Running proofs
 
