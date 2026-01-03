@@ -12,7 +12,7 @@ is
 
    procedure Append_Instruction (V : in out VM; Inst : Cell) is
    begin
-      if V.Num_Instructions > Max_Instructions then
+      if V.Num_Instructions = Max_Instructions then
          Stop
            (V,
             Instruction_Space_Exceeded,
@@ -424,7 +424,7 @@ is
 
    procedure Run_Address_Interpreter (V : in out VM; Id : Word_Id) is
       Start     : constant Word_Header := V.Words.Words (Id);
-      Next_Word : Word_Id := Id;
+      Next_Word : Word_Id;
    begin
       --  Ensure that the word is an interpreted (compiled) word.
       if Start.Code.Form /= Form_Instructions then
