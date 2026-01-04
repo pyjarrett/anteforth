@@ -44,6 +44,9 @@ is
       Register (V, "(", Builtins.Comment'Access, Immediate => True);
       Register (V, ":", Builtins.Colon'Access);
       Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
+      Register (V, "[", Op_Left_Bracket'Access, Immediate => True);
+      Register (V, "]", Op_Right_Bracket'Access, Immediate => True);
+
       Register (V, "EXIT", Builtins.Op_Exit'Access);
       Register (V, "?EXIT", Builtins.Op_Conditional_Exit'Access);
 
@@ -396,6 +399,16 @@ is
          V.Status := Instruction_Space_Exceeded;
       end if;
    end Semicolon;
+
+   procedure Op_Left_Bracket (V : in out VM) is
+   begin
+      V.Compiling := False;
+   end Op_Left_Bracket;
+
+   procedure Op_Right_Bracket (V : in out VM) is
+   begin
+      V.Compiling := True;
+   end Op_Right_Bracket;
 
    procedure Recurse (V : in out VM) is
    begin

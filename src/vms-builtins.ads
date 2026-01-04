@@ -213,6 +213,12 @@ is
        (Is_Running (V) and then Only_TIB_Changed (V, V'Old))
        or else (not Is_Running (V));
 
+   procedure Op_Left_Bracket (V : in out VM)
+   with Global => null, Pre => Is_Running (V), Post => not Is_Compiling (V);
+
+   procedure Op_Right_Bracket (V : in out VM)
+   with Global => null, Pre => Is_Running (V), Post => Is_Compiling (V);
+
    --  Creates a new word definition.
    --
    --  Reads the new word name from the TIB.
