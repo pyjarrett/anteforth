@@ -2,7 +2,17 @@ package VMS.Builtins
   with SPARK_Mode => On, Elaborate_Body
 is
    procedure Register_Builtins (V : in out VM)
-   with Post => Only_Words_Changed (V, V'Old);
+   with
+     Post =>
+       --  Everything except status and words should remain the same.
+       Same_State (V, V'Old)
+       --   and then Same_Status (V, V'Old)
+       and then Same_TIB (V, V'Old)
+       and then Same_Params (V, V'Old)
+       and then Same_Returns (V, V'Old)
+       --   and then Same_Words (V, V'Old)
+       and then Same_Instructions (V, V'Old)
+       and then Same_Address_Interpreter (V, V'Old);
 
    procedure Op_Add (V : in out VM)
    with
@@ -197,7 +207,11 @@ is
           not Is_Running (V));
 
    procedure Comment (V : in out VM)
-   with Pre => Is_Running (V), Post => Only_TIB_Changed (V, V'Old);
+   with
+     Pre  => Is_Running (V),
+     Post =>
+       (Is_Running (V) and then Only_TIB_Changed (V, V'Old))
+       or else (not Is_Running (V));
 
    --  Creates a new word definition.
    --
@@ -209,7 +223,7 @@ is
      Post =>
        (not Is_Running (V))
        or else (Is_Running (V)
-                and then Param_Stack_Equal (V, V'Old)
+                and then Same_Params (V, V'Old)
                 and then Is_Compiling (V));
 
    --  Terminates the current word definition
@@ -277,8 +291,8 @@ is
      Post =>
        (not Is_Running (V))
        or else (Is_Running (V)
-                and then FC_Words_Equal (V, V'Old)
-                and then FC_Address_Interpreter_Equal (V, V'Old)
+                and then Same_Words (V, V'Old)
+                and then Same_Address_Interpreter (V, V'Old)
                 and then V.Param_Top = V'Old.Param_Top + 1
                 and then V.Params (V.Param_Top) = V.Num_Instructions
                 and then V.Num_Instructions = V.Num_Instructions'Old + 2);

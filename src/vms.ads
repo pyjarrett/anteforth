@@ -264,10 +264,10 @@ is
           not Is_Running (V) and then Only_Status_Changed (V, V'Old),
         others                  =>
           V.IP = V'Old.IP + 1
-          and then Param_Stack_Equal (V, V'Old)
-          and then Return_Stack_Equal (V, V'Old)
-          and then FC_Instructions_Equal (V, V'Old)
-          and then FC_Words_Equal (V, V'Old));
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Words (V, V'Old));
 
    ---------------------------------------------------------------------------
    --  "Maintenance" facilities - theseDebugging and analysis functions
@@ -276,26 +276,13 @@ is
    procedure Dump_VM (V : VM);
 
    ---------------------------------------------------------------------------
-   --  Frame conditions checks
+   --  Frame conditions helpers
    ---------------------------------------------------------------------------
-
-   ------------------------------
-   --  Param Stack
-   ------------------------------
-   function Param_Stack_Equal (A, B : VM) return Boolean
-   is ((for all X in A.Params'Range => A.Params (X) = B.Params (X))
-       and then (A.Param_Top = B.Param_Top))
-   with Ghost, Global => null;
 
    function Param_Stack_Equal_From_Bottom_Until
      (A, B : VM; Depth : Natural) return Boolean
    is (for all X in 1 .. Depth => A.Params (X) = B.Params (X))
    with Ghost, Global => null, Pre => Depth <= Max_Param_Stack_Size;
-
-   function Return_Stack_Equal (A, B : VM) return Boolean
-   is ((for all X in A.Returns'Range => A.Returns (X) = B.Returns (X))
-       and then (A.Returns_Top = B.Returns_Top))
-   with Ghost, Global => null;
 
    function Return_Stack_Equal_From_Bottom_Until
      (A, B : VM; Depth : Natural) return Boolean
@@ -309,55 +296,126 @@ is
    --  checks ensure that other parts remain unchanged.  Frame conditions assume
    --  unchecked parts have unknown values, so make these checks convenient.
    ------------------------------
-   function FC_Words_Equal (A, B : VM) return Boolean
+
+   --  The core system-wide checks have the "Same" prefix.
+
+   function Same_State (A, B : VM) return Boolean
+   is (A.Compiling = B.Compiling);
+
+   function Same_Status (A, B : VM) return Boolean
+   is (A.Status = B.Status);
+
+   function Same_TIB (A, B : VM) return Boolean
+   is (A.TIB = B.TIB);
+
+   function Same_Params (A, B : VM) return Boolean
+   is ((for all X in A.Params'Range => A.Params (X) = B.Params (X))
+       and then (A.Param_Top = B.Param_Top))
+   with Ghost, Global => null;
+
+   function Same_Returns (A, B : VM) return Boolean
+   is ((for all X in A.Returns'Range => A.Returns (X) = B.Returns (X))
+       and then (A.Returns_Top = B.Returns_Top))
+   with Ghost, Global => null;
+
+   function Same_Words (A, B : VM) return Boolean
    is (A.Words = B.Words);
 
-   function FC_Instructions_Equal (A, B : VM) return Boolean
+   function Same_Instructions (A, B : VM) return Boolean
    is (A.Instructions = B.Instructions
        and then A.Num_Instructions = B.Num_Instructions);
 
-   function FC_Address_Interpreter_Equal (A, B : VM) return Boolean
+   function Same_Address_Interpreter (A, B : VM) return Boolean
    is (A.Returns = B.Returns
        and then A.Returns_Top = B.Returns_Top
        and then A.IP = B.IP);
 
-   function Only_Param_Stack_Changed (A, B : VM) return Boolean
-   is (A.Compiling = B.Compiling
-       and then A.TIB = B.TIB
-       and then A.Words = B.Words
-       and then FC_Instructions_Equal (A, B)
-       and then FC_Address_Interpreter_Equal (A, B)
-       and then Return_Stack_Equal (A, B))
-   with Ghost;
+   ------------------------------
+   --  All-except-this helpers
+   ------------------------------
 
-   function Only_Words_Changed (A, B : VM) return Boolean
-   is (A.Compiling = B.Compiling
-       and then Param_Stack_Equal (A, B)
-       and then Return_Stack_Equal (A, B)
-       and then A.TIB = B.TIB)
+   function Same (A, B : VM) return Boolean
+   is ( --
+       Same_State (A, B)
+       and then Same_Status (A, B)
+       and then Same_TIB (A, B)
+       and then Same_Params (A, B)
+       and then Same_Returns (A, B)
+       and then Same_Words (A, B)
+       and then Same_Instructions (A, B)
+       and then Same_Address_Interpreter (A, B)
+       --
+       )
    with Ghost;
 
    function Only_Status_Changed (A, B : VM) return Boolean
-   is (A.Compiling = B.Compiling
-       and then Only_Param_Stack_Changed (A, B)
-       and then Only_Words_Changed (A, B))
+   is ( --
+       Same_State (A, B)
+       --   and then Same_Status (A, B)
+       and then Same_TIB (A, B)
+       and then Same_Params (A, B)
+       and then Same_Returns (A, B)
+       and then Same_Words (A, B)
+       and then Same_Instructions (A, B)
+       and then Same_Address_Interpreter (A, B)
+       --
+       )
+   with Ghost;
+
+   function Only_Param_Stack_Changed (A, B : VM) return Boolean
+   is ( --
+       Same_State (A, B)
+       and then Same_Status (A, B)
+       and then Same_TIB (A, B)
+       --   and then Same_Params (A, B)
+       and then Same_Returns (A, B)
+       and then Same_Words (A, B)
+       and then Same_Instructions (A, B)
+       and then Same_Address_Interpreter (A, B)
+       ---
+       )
+   with Ghost;
+
+   function Only_Words_Changed (A, B : VM) return Boolean
+   is ( --
+       Same_State (A, B)
+       and then Same_Status (A, B)
+       and then Same_TIB (A, B)
+       and then Same_Params (A, B)
+       and then Same_Returns (A, B)
+       --   and then Same_Words (A, B)
+       and then Same_Instructions (A, B)
+       and then Same_Address_Interpreter (A, B)
+       --
+       )
    with Ghost;
 
    function Only_Instructions_Changed (A, B : VM) return Boolean
-   is (A.Compiling = B.Compiling
-       and then A.TIB = B.TIB
-       and then FC_Words_Equal (A, B)
-       and then FC_Address_Interpreter_Equal (A, B)
-       and then Param_Stack_Equal (A, B)
-       and then Return_Stack_Equal (A, B))
+   is ( --
+       Same_State (A, B)
+       and then Same_Status (A, B)
+       and then Same_TIB (A, B)
+       and then Same_Params (A, B)
+       and then Same_Returns (A, B)
+       and then Same_Words (A, B)
+       --   and then Same_Instructions (A, B)
+       and then Same_Address_Interpreter (A, B)
+       --
+       )
    with Ghost;
 
    function Only_TIB_Changed (A, B : VM) return Boolean
-   is (A.Compiling = B.Compiling
-       and then Param_Stack_Equal (A, B)
-       and then Return_Stack_Equal (A, B)
-       and then FC_Words_Equal (A, B)
-       and then A.Words = B.Words)
+   is ( --
+       Same_State (A, B)
+       and then Same_Status (A, B)
+       --   and then Same_TIB (A, B)
+       and then Same_Params (A, B)
+       and then Same_Returns (A, B)
+       and then Same_Words (A, B)
+       and then Same_Instructions (A, B)
+       and then Same_Address_Interpreter (A, B)
+       --
+       )
    with Ghost;
 
    ---------------------------------------------------------------------------
@@ -400,7 +458,7 @@ is
      Pre            => Is_Running (V),
      Contract_Cases =>
        (not Is_Running (V)                       =>
-          not Is_Running (V) and then Param_Stack_Equal (V'Old, V),
+          not Is_Running (V) and then Same_Params (V'Old, V),
         Is_Running (V) and then V.Param_Top = 0  =>
           not Is_Running (V) and then Only_Status_Changed (V, V'Old),
         Is_Running (V) and then V.Param_Top /= 0 =>
@@ -419,7 +477,7 @@ is
        and then Depth <= Param_Stack_Size (V),
      Contract_Cases =>
        (not Is_Running (V)                       =>
-          not Is_Running (V) and then Param_Stack_Equal (V'Old, V),
+          not Is_Running (V) and then Same_Params (V'Old, V),
         Is_Running (V) and then V.Param_Top = 0  =>
           not Is_Running (V) and then Only_Status_Changed (V, V'Old),
         Is_Running (V) and then V.Param_Top /= 0 =>
@@ -466,8 +524,12 @@ is
       Intrinsic : Op_Intrinsic;
       Immediate : Boolean := False)
    with
-     Pre  => Name'Length in Word_Length,
-     Post => Only_Words_Changed (V, V'Old);
+     Pre            => Name'Length in Word_Length,
+     Contract_Cases =>
+       (Can_Allocate_Name (V.Words, Name'Length)
+        and then Can_Allocate_Word (V.Words) => Only_Words_Changed (V, V'Old),
+        others                               =>
+          not Is_Running (V) and then Only_Status_Changed (V, V'Old));
 
    procedure Register
      (V         : in out VM;
@@ -475,8 +537,12 @@ is
       Proc      : Op_Procedure;
       Immediate : Boolean := False)
    with
-     Pre  => Name'Length in Word_Length,
-     Post => Only_Words_Changed (V, V'Old);
+     Pre            => Name'Length in Word_Length,
+     Contract_Cases =>
+       (Can_Allocate_Name (V.Words, Name'Length)
+        and then Can_Allocate_Word (V.Words) => Only_Words_Changed (V, V'Old),
+        others                               =>
+          not Is_Running (V) and then Only_Status_Changed (V, V'Old));
 
    function Can_Allocate_Word (Table : Word_Table) return Boolean
    is (Table.Words_Used < Max_Words);
