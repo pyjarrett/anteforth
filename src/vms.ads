@@ -524,12 +524,10 @@ is
       Intrinsic : Op_Intrinsic;
       Immediate : Boolean := False)
    with
-     Pre            => Name'Length in Word_Length,
-     Contract_Cases =>
-       (Can_Allocate_Name (V.Words, Name'Length)
-        and then Can_Allocate_Word (V.Words) => Only_Words_Changed (V, V'Old),
-        others                               =>
-          not Is_Running (V) and then Only_Status_Changed (V, V'Old));
+     Pre  => Name'Length in Word_Length,
+     Post =>
+       (not Is_Running (V) and then Only_Status_Changed (V, V'Old))
+       or else (Only_Words_Changed (V, V'Old));
 
    procedure Register
      (V         : in out VM;
@@ -537,12 +535,10 @@ is
       Proc      : Op_Procedure;
       Immediate : Boolean := False)
    with
-     Pre            => Name'Length in Word_Length,
-     Contract_Cases =>
-       (Can_Allocate_Name (V.Words, Name'Length)
-        and then Can_Allocate_Word (V.Words) => Only_Words_Changed (V, V'Old),
-        others                               =>
-          not Is_Running (V) and then Only_Status_Changed (V, V'Old));
+     Pre  => Name'Length in Word_Length,
+     Post =>
+       (not Is_Running (V) and then Only_Status_Changed (V, V'Old))
+       or else (Only_Words_Changed (V, V'Old));
 
    function Can_Allocate_Word (Table : Word_Table) return Boolean
    is (Table.Words_Used < Max_Words);
