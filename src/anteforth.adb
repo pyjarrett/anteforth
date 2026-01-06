@@ -10,7 +10,7 @@ procedure Anteforth with SPARK_Mode => Off is
       V : VMS.VM;
    begin
       VMS.Builtins.Register_Builtins (V);
-      while VMS.Is_Running (V) and then VMS.Is_Running (V) loop
+      while VMS.Is_Running (V) loop
          declare
             Line : constant String := Ada.Text_IO.Get_Line;
          begin
