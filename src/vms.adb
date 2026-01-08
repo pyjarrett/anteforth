@@ -47,6 +47,7 @@ is
       end loop;
    end Dump_Param_Stack;
 
+   --  Prints full context of the VM, mostly for debugging.
    procedure Dump_VM (V : VM) is
       procedure Safe_Col (C : Ada.Text_IO.Count) is
          use all type Ada.Text_IO.Count;
@@ -61,7 +62,9 @@ is
          when others =>
             null;
       end Safe_Col;
+      use type Ada.Text_IO.Count;
    begin
+      Ada.Text_IO.New_Line;
       Ada.Text_IO.Put_Line ("------ VM DUMP -------");
 
       Ada.Text_IO.Put_Line ("Status: " & V.Status'Image);
@@ -73,22 +76,34 @@ is
          end if;
       end if;
 
-      Ada.Text_IO.Put ("Params: ");
+      Ada.Text_IO.Put
+        ("Params: " & V.Param_Top'Image & " /" & Max_Param_Stack_Size'Image);
+      Ada.Text_IO.New_Line;
       Dump_Param_Stack (V);
       Ada.Text_IO.New_Line;
 
+      Ada.Text_IO.Put_Line
+        ("Words:" & V.Words.Words_Used'Image & " /" & Max_Words'Image);
       for I in 1 .. V.Words.Words_Used loop
+         Ada.Text_IO.Put (I'Image);
+         Safe_Col (8);
+         Ada.Text_IO.Put
+           (V.Words.Names
+              (V.Words.Words (I).Name_Start .. V.Words.Words (I).Name_End));
+         Safe_Col (Max_Word_Length + 10);
          Ada.Text_IO.Put_Line
-           ("Word"
-            & I'Image
-            & ": "
-            & V.Words.Names
-                (V.Words.Words (I).Name_Start .. V.Words.Words (I).Name_End)
-            & " ("
-            & V.Words.Words (Word_Index (I)).Code.Form'Image
-            & ")");
+           (case V.Words.Words (Word_Index (I)).Code.Form is
+              when Form_Instructions     => "compiled",
+              when Form_Intrinsic        => "built-in",
+              when Form_Procedure_Access => "procedure access");
       end loop;
 
+      Ada.Text_IO.New_Line;
+      Ada.Text_IO.Put_Line
+        ("Instructions: "
+         & V.Num_Instructions'Image
+         & " /"
+         & Max_Instructions'Image);
       for I in 1 .. V.Num_Instructions loop
          Ada.Text_IO.Put (I'Image & ": ");
          if I = V.IP then
@@ -119,7 +134,14 @@ is
          end;
       end loop;
 
-      Ada.Text_IO.Put ("Return: ");
+      Ada.Text_IO.Put
+        ("Return: "
+         & V.Returns_Top'Image
+         & " /"
+         & Max_Return_Stack_Size'Image);
+      if V.Returns_Top /= 0 then
+         Ada.Text_IO.New_Line;
+      end if;
       for I in 1 .. V.Returns_Top loop
          Ada.Text_IO.Put_Line (V.Returns (I)'Image & " ");
       end loop;
