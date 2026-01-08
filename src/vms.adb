@@ -353,14 +353,26 @@ is
    end Lookup;
 
    procedure Print_Words (V : VM) is
+      Last_Was_New_Line : Boolean := False;
+      use type Ada.Text_IO.Count;
    begin
       for Id in 1 .. V.Words.Words_Used loop
          Ada.Text_IO.Put
            (V.Words.Names
               (V.Words.Words (Id).Name_Start .. V.Words.Words (Id).Name_End)
             & " ");
+
+         if Ada.Text_IO.Col >= 80 then
+            Ada.Text_IO.New_Line;
+            Last_Was_New_Line := True;
+         else
+            Last_Was_New_Line := False;
+         end if;
       end loop;
-      Ada.Text_IO.New_Line;
+
+      if not Last_Was_New_Line then
+         Ada.Text_IO.New_Line;
+      end if;
    end Print_Words;
 
    procedure Execute (V : in out VM; Op : Word_Id) is

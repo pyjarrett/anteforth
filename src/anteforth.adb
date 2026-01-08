@@ -1,5 +1,6 @@
 with Ada.Command_Line;
 with Ada.Exceptions;
+with Ada.Strings.Equal_Case_Insensitive;
 with Ada.Text_IO;
 with Terminal_Input_Buffers;
 with VMS.Builtins;
@@ -9,14 +10,39 @@ procedure Anteforth with SPARK_Mode => Off is
    procedure Run_REPL is
       V : VMS.VM;
    begin
+
       VMS.Builtins.Register_Builtins (V);
-      while VMS.Is_Running (V) loop
+
+      Ada.Text_IO.Put_Line ("----------------------------------------------");
+      Ada.Text_IO.Put_Line ("Available words: ");
+      Ada.Text_IO.New_Line;
+      VMS.Print_Words (V);
+      Ada.Text_IO.New_Line;
+      Ada.Text_IO.Put_Line ("bye to exit");
+      Ada.Text_IO.Put_Line ("----------------------------------------------");
+
+      loop
+         Ada.Text_IO.New_Line;
+         Ada.Text_IO.Put (" > ");
          declare
             Line : constant String := Ada.Text_IO.Get_Line;
          begin
             if Line'Length <= Terminal_Input_Buffers.Max_Input_Length then
-               exit when Line = "bye" or else Line = "BYE";
-               VMS.Exec (V, Line);
+               exit when Ada.Strings.Equal_Case_Insensitive (Line, "BYE");
+
+               if Ada.Strings.Equal_Case_Insensitive (Line, "RESET") then
+                  VMS.Execute (V, VMS.Reset);
+               elsif VMS.Is_Running (V) then
+                  VMS.Exec (V, Line);
+               else
+                  Ada.Text_IO.Put_Line ("Invalid word, VM is not running.");
+               end if;
+
+               if not VMS.Is_Running (V) then
+                  Ada.Text_IO.New_Line;
+                  VMS.Dump_VM (V);
+                  Ada.Text_IO.New_Line;
+               end if;
             else
                Ada.Text_IO.Put_Line ("Input line too long!");
             end if;
