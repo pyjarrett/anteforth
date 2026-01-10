@@ -1,3 +1,5 @@
+with Ada.Characters;
+with Ada.Characters.Handling;
 with Ada.Text_IO;
 
 package body VMS
@@ -97,6 +99,13 @@ is
               when Form_Intrinsic        => "built-in",
               when Form_Procedure_Access => "procedure access");
       end loop;
+
+      Ada.Text_IO.Put_Line
+        ("Name Storage: "
+         & V.Words.Name_Space_Used'Image
+         & " /"
+         & Word_Name_Storage_Size'Image);
+      Ada.Text_IO.Put_Line (V.Words.Names);
 
       Ada.Text_IO.New_Line;
       Ada.Text_IO.Put_Line
@@ -368,12 +377,12 @@ is
            Name_Index (Table.Name_Space_Used + Name_Length);
          Table.Words (New_Word).Code := Code;
          Table.Words (New_Word).Immediate := Immediate;
-         Table.WOrds (New_Word).Has_Value := Has_Value;
+         Table.Words (New_Word).Has_Value := Has_Value;
          Table.Names
            (Table.Name_Space_Used
             + 1
             .. Table.Name_Space_Used + Name_Space_Count (Name_Length)) :=
-           Name (Name'First .. Name'Last);
+           Ada.Characters.Handling.To_Upper (Name (Name'First .. Name'Last));
          Table.Name_Space_Used :=
            Table.Name_Space_Used + Name_Space_Count (Name_Length);
          Table.Words_Used := Table.Words_Used + 1;
