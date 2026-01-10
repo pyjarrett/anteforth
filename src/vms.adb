@@ -124,12 +124,17 @@ is
             Next_Cell   : constant Cell := V.Instructions (Integer (I));
             Next_Word   : Word_Id;
             Word_Column : constant := 20;
+            Prev_Inst   : constant Cell :=
+              (if I > 1 then V.Instructions (Positive (I) - 1) else 0);
+            Prev_Word   : constant Word_Id :=
+              (if Prev_Inst >= Cell (Word_Id'First)
+                 and then Prev_Inst <= Cell (Word_Id'Last)
+               then Word_Id (Prev_Inst)
+               else Error);
          begin
-            if I > 1
-              and then Integer (V.Instructions (Integer (I) - 1)) in Word_Index
-              and then V.Words.Words
-                         (Word_Index (V.Instructions (Integer (I) - 1)))
-                         .Has_Value
+            if Prev_Word /= Error
+              and then Prev_Word in Word_Index
+              and then V.Words.Words (Prev_Word).Has_Value
             then
                --  If the previous instruction had a value, just print it.
                Safe_Col
