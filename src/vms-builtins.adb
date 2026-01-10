@@ -12,53 +12,128 @@ is
    subtype Prohibited_Divisor is Unbounded_Value range 0 .. 0;
 
    procedure Register_Builtins (V : in out VM) is
+      --  Reduce number of steps required to prove this procedure by splitting
+      --  it up into smaller procedures.
+      procedure Register_Intrinsics (V : in out VM)
+      with
+        Global => null,
+        Post   =>
+          Same_State (V, V'Old)
+          and then Same_TIB (V, V'Old)
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Address_Interpreter (V, V'Old)
+      is
+      begin
+         Register (V, "RESET", Clear_Error);
+         Register (V, "WORDS", Words);
+         Register (V, "DUMP", Dump_VM);
+         Register (V, ".", Print);
+         Register (V, ".S", Print_Stack);
+         Register (V, "CR", CR);
+      end Register_Intrinsics;
+
+      procedure Register_Comparison (V : in out VM)
+      with
+        Global => null,
+        Post   =>
+          Same_State (V, V'Old)
+          and then Same_TIB (V, V'Old)
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Address_Interpreter (V, V'Old)
+      is
+      begin
+         Register (V, "0=", Builtins.Op_Zero_Equal'Access);
+         Register (V, "0<>", Builtins.Op_Zero_Not_Equal'Access);
+         Register (V, "0<", Builtins.Op_Zero_Less_Than'Access);
+         Register (V, "0>", Builtins.Op_Zero_Greater_Than'Access);
+
+         Register (V, "=", Builtins.Op_Equal'Access);
+         Register (V, "<>", Builtins.Op_Not_Equal'Access);
+         Register (V, "<", Builtins.Op_Less_Than'Access);
+         Register (V, ">", Builtins.Op_Greater_Than'Access);
+
+         Register (V, "+", Builtins.Op_Add'Access);
+         Register (V, "-", Builtins.Op_Subtract'Access);
+         Register (V, "*", Builtins.Op_Multiply'Access);
+         Register (V, "/", Builtins.Op_Divide'Access);
+      end Register_Comparison;
+
+      procedure Register_Stack_Ops (V : in out VM)
+      with
+        Global => null,
+        Post   =>
+          Same_State (V, V'Old)
+          and then Same_TIB (V, V'Old)
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Address_Interpreter (V, V'Old)
+      is
+      begin
+         Register (V, "NEGATE", Builtins.Op_Negate'Access);
+         Register (V, "SWAP", Builtins.Op_Swap'Access);
+         Register (V, "OVER", Builtins.Op_Over'Access);
+         Register (V, "ROT", Builtins.Op_Rotate'Access);
+         Register (V, "DUP", Builtins.Op_Dupe'Access);
+         Register (V, "DROP", Builtins.Op_Drop'Access);
+         Register (V, ">R", Builtins.Op_Push_To_Return_Stack'Access);
+         Register (V, "R>", Builtins.Op_Push_From_Return_Stack'Access);
+      end Register_Stack_Ops;
+
+      procedure Register_Compilation (V : in out VM)
+      with
+        Global => null,
+        Post   =>
+          Same_State (V, V'Old)
+          and then Same_TIB (V, V'Old)
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Address_Interpreter (V, V'Old)
+      is
+      begin
+         Register (V, "(", Builtins.Comment'Access, Immediate => True);
+         Register (V, ":", Builtins.Colon'Access);
+         Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
+         Register (V, "[", Op_Left_Bracket'Access, Immediate => True);
+         Register (V, "]", Op_Right_Bracket'Access, Immediate => True);
+         Register (V, "LITERAL", Builtins.Op_Literal'Access);
+         Register (V, "EXIT", Builtins.Op_Exit'Access);
+         Register (V, "?EXIT", Builtins.Op_Conditional_Exit'Access);
+      end Register_Compilation;
+
+      procedure Register_Control_Flow (V : in out VM)
+      with
+        Global => null,
+        Post   =>
+          Same_State (V, V'Old)
+          and then Same_TIB (V, V'Old)
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Address_Interpreter (V, V'Old)
+      is
+      begin
+         Register (V, "BRANCH", Builtins.Op_Branch'Access);
+         Register (V, "0BRANCH", Builtins.Op_Branch_If_False'Access);
+         Register (V, "IF", Builtins.Op_If'Access, Immediate => True);
+         Register (V, "THEN", Builtins.Op_Then'Access, Immediate => True);
+         Register (V, "ELSE", Builtins.Op_Else'Access, Immediate => True);
+         Register (V, "RECURSE", Recurse'Access, Immediate => True);
+         Register (V, "BEGIN", Builtins.Op_Begin'Access, Immediate => True);
+         Register (V, "UNTIL", Builtins.Op_Until'Access, Immediate => True);
+      end Register_Control_Flow;
+
    begin
-      Register (V, "RESET", Clear_Error);
-      Register (V, "WORDS", Words);
-      Register (V, "DUMP", Dump_VM);
-      Register (V, ".", Print);
-      Register (V, ".S", Print_Stack);
-      Register (V, "CR", CR);
-
-      Register (V, "0=", Builtins.Op_Zero_Equal'Access);
-      Register (V, "0<", Builtins.Op_Zero_Less_Than'Access);
-      Register (V, "0>", Builtins.Op_Zero_Greater_Than'Access);
-      Register (V, "=", Builtins.Op_Equal'Access);
-      Register (V, "<", Builtins.Op_Less_Than'Access);
-      Register (V, ">", Builtins.Op_Greater_Than'Access);
-      Register (V, "+", Builtins.Op_Add'Access);
-      Register (V, "-", Builtins.Op_Subtract'Access);
-      Register (V, "*", Builtins.Op_Multiply'Access);
-      Register (V, "/", Builtins.Op_Divide'Access);
-      Register (V, "NEGATE", Builtins.Op_Negate'Access);
-      Register (V, "SWAP", Builtins.Op_Swap'Access);
-      Register (V, "OVER", Builtins.Op_Over'Access);
-      Register (V, "ROT", Builtins.Op_Rotate'Access);
-      Register (V, "DUP", Builtins.Op_Dupe'Access);
-      Register (V, "DROP", Builtins.Op_Drop'Access);
-      Register (V, "LITERAL", Builtins.Op_Literal'Access);
-
-      Register (V, ">R", Builtins.Op_Push_To_Return_Stack'Access);
-      Register (V, "R>", Builtins.Op_Push_From_Return_Stack'Access);
-
-      Register (V, "(", Builtins.Comment'Access, Immediate => True);
-      Register (V, ":", Builtins.Colon'Access);
-      Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
-      Register (V, "[", Op_Left_Bracket'Access, Immediate => True);
-      Register (V, "]", Op_Right_Bracket'Access, Immediate => True);
-
-      Register (V, "EXIT", Builtins.Op_Exit'Access);
-      Register (V, "?EXIT", Builtins.Op_Conditional_Exit'Access);
-
-      Register (V, "BRANCH", Builtins.Op_Branch'Access);
-      Register (V, "0BRANCH", Builtins.Op_Branch_If_False'Access);
-      Register (V, "IF", Builtins.Op_If'Access, Immediate => True);
-      Register (V, "THEN", Builtins.Op_Then'Access, Immediate => True);
-      Register (V, "ELSE", Builtins.Op_Else'Access, Immediate => True);
-      Register (V, "RECURSE", Recurse'Access, Immediate => True);
-
-      Register (V, "BEGIN", Builtins.Op_Begin'Access, Immediate => True);
-      Register (V, "UNTIL", Builtins.Op_Until'Access, Immediate => True);
+      Register_Intrinsics (V);
+      Register_Comparison (V);
+      Register_Stack_Ops (V);
+      Register_Compilation (V);
+      Register_Control_Flow (V);
    end Register_Builtins;
 
    procedure Op_Add (V : in out VM) is
@@ -744,6 +819,19 @@ is
       Param_Push (V, Value);
    end Op_Zero_Equal;
 
+   procedure Op_Zero_Not_Equal (V : in out VM) is
+      Value : Cell;
+   begin
+      if Param_Stack_Size (V) = 0 then
+         V.Status := Param_Stack_Underflow;
+         return;
+      end if;
+
+      Value := (if Param_Peek (V) /= 0 then -1 else 0);
+      Param_Multipop (V, 1);
+      Param_Push (V, Value);
+   end Op_Zero_Not_Equal;
+
    procedure Op_Zero_Less_Than (V : in out VM) is
       Value : Cell;
    begin
@@ -783,6 +871,20 @@ is
       Param_Multipop (V, 2);
       Param_Push (V, (if A = B then -1 else 0));
    end Op_Equal;
+
+   procedure Op_Not_Equal (V : in out VM) is
+      A, B : Cell;
+   begin
+      if Param_Stack_Size (V) <= 1 then
+         V.Status := Param_Stack_Underflow;
+         return;
+      end if;
+
+      A := Param_Peek (V, 1);
+      B := Param_Peek (V, 0);
+      Param_Multipop (V, 2);
+      Param_Push (V, (if A /= B then -1 else 0));
+   end Op_Not_Equal;
 
    procedure Op_Less_Than (V : in out VM) is
       A, B : Cell;

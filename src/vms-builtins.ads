@@ -6,11 +6,11 @@ is
      Post =>
        --  Everything except status and words should remain the same.
        Same_State (V, V'Old)
-       --   and then Same_Status (V, V'Old)
+       --   and then Same_Status (V, V'Old) -- status might change
        and then Same_TIB (V, V'Old)
        and then Same_Params (V, V'Old)
        and then Same_Returns (V, V'Old)
-       --   and then Same_Words (V, V'Old)
+       --   and then Same_Words (V, V'Old) -- words could change
        and then Same_Instructions (V, V'Old)
        and then Same_Address_Interpreter (V, V'Old);
 
@@ -387,6 +387,21 @@ is
                            (V, V'Old, V.Param_Top - 1)
                 and then Only_Param_Stack_Changed (V, V'Old));
 
+   procedure Op_Zero_Not_Equal (V : in out VM)
+   with
+     Pre  => Is_Running (V),
+     Post =>
+       (Param_Stack_Size (V'Old) = 0
+        and then V.Status = Param_Stack_Underflow
+        and then Only_Status_Changed (V, V'Old))
+       or else ((if V'Old.Params (V'Old.Param_Top) /= 0
+                 then V.Params (V.Param_Top) = -1
+                 else V.Params (V.Param_Top) = 0)
+                and then V.Param_Top = V'Old.Param_Top
+                and then Param_Stack_Equal_From_Bottom_Until
+                           (V, V'Old, V.Param_Top - 1)
+                and then Only_Param_Stack_Changed (V, V'Old));
+
    procedure Op_Zero_Less_than (V : in out VM)
    with
      Pre  => Is_Running (V),
@@ -429,6 +444,21 @@ is
            and then Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1
            and then (if V'Old.Params (V'Old.Param_Top - 1)
                        = V'Old.Params (V'Old.Param_Top)
+                     then V.Params (V.Param_Top) = -1
+                     else V.Params (V.Param_Top) = 0)));
+
+   procedure Op_Not_Equal (V : in out VM)
+   with
+     Pre            => Is_Running (V),
+     Contract_Cases =>
+       (V.Param_Top < 2 =>
+          V.Status = Param_Stack_Underflow
+          and then Only_Status_Changed (V, V'Old),
+        others          =>
+          (Only_Param_Stack_Changed (V, V'Old)
+           and then Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1
+           and then (if V'Old.Params (V'Old.Param_Top - 1)
+                       /= V'Old.Params (V'Old.Param_Top)
                      then V.Params (V.Param_Top) = -1
                      else V.Params (V.Param_Top) = 0)));
 
