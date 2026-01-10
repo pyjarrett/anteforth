@@ -71,7 +71,7 @@ def ensure_runs_ok(file):
 def main():
     subprocess.check_call(["alr", "build"])
     print_header()
-    for root, dirs, files in os.walk("."):
+    for root, dirs, files in os.walk("examples"):
         for file in files:
             if file.endswith(".fth"):
                 full = os.path.join(root, file)

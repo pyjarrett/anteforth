@@ -101,7 +101,7 @@ is
          Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
          Register (V, "[", Op_Left_Bracket'Access, Immediate => True);
          Register (V, "]", Op_Right_Bracket'Access, Immediate => True);
-         Register (V, "LITERAL", Builtins.Op_Literal'Access);
+         Register (V, "LIT", Builtins.Op_Literal'Access);
          Register (V, "EXIT", Builtins.Op_Exit'Access);
          Register (V, "?EXIT", Builtins.Op_Conditional_Exit'Access);
       end Register_Compilation;
@@ -372,7 +372,7 @@ is
 
          if Param_Stack_Size (V) > 0 then
             Param_Pop (V, Value);
-            Append_Instruction (V, Cell (Lookup (V.Words, "LITERAL")));
+            Append_Instruction (V, Cell (Lookup (V.Words, "LIT")));
             Append_Instruction (V, Value);
          else
             V.Status := Param_Stack_Underflow;

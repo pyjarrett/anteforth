@@ -235,7 +235,7 @@ is
                         return;
                      end if;
 
-                     Maybe_Word := Lookup (V.Words, "LITERAL");
+                     Maybe_Word := Lookup (V.Words, "LIT");
                      if not Is_Word (V, Maybe_Word) then
                         Stop (V, Invalid_Operation, "No LITERAL word exists");
                         return;
