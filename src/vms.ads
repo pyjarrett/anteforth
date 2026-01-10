@@ -118,6 +118,9 @@ is
       Name_End   : Name_Index := 1;
       Code       : Word_Code := (Form => Form_Intrinsic, Intrinsic => Nop);
       Immediate  : Boolean := False;
+      --  Some words use the next value in the instruction list.  This is used
+      --  when dumping the VM.
+      Has_Value  : Boolean := False;
    end record;
 
    subtype Word_Count is Natural range 0 .. Max_Words;
@@ -522,7 +525,8 @@ is
      (V         : in out VM;
       Name      : String;
       Intrinsic : Op_Intrinsic;
-      Immediate : Boolean := False)
+      Immediate : Boolean := False;
+      Has_Value : Boolean := False)
    with
      Pre  => Name'Length in Word_Length,
      Post =>
@@ -533,7 +537,8 @@ is
      (V         : in out VM;
       Name      : String;
       Proc      : Op_Procedure;
-      Immediate : Boolean := False)
+      Immediate : Boolean := False;
+      Has_Value : Boolean := False)
    with
      Pre  => Name'Length in Word_Length,
      Post =>
@@ -551,7 +556,8 @@ is
      (Table     : in out Word_Table;
       Name      : String;
       Code      : Word_Code;
-      Immediate : Boolean)
+      Immediate : Boolean;
+      Has_Value : Boolean)
    with
      Pre  =>
        Can_Allocate_Word (Table)

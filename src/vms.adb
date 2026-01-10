@@ -112,24 +112,37 @@ is
          Safe_Col (8);
 
          declare
-            Next_Cell : constant Cell := V.Instructions (Integer (I));
-            Next_Word : Word_Id;
+            Next_Cell   : constant Cell := V.Instructions (Integer (I));
+            Next_Word   : Word_Id;
+            Word_Column : constant := 20;
          begin
-            if Cell (Word_Id'First) <= Next_Cell
-              and then Next_Cell <= Cell (Word_Id'Last)
+            if I > 1
+              and then Integer (V.Instructions (Integer (I) - 1)) in Word_Index
+              and then V.Words.Words
+                         (Word_Index (V.Instructions (Integer (I) - 1)))
+                         .Has_Value
             then
-               Ada.Text_IO.Put (Next_Cell'Image);
-               Safe_Col (20);
-               Next_Word := Word_Id (Next_Cell);
-               if Next_Word <= V.Words.Words_Used then
-                  Ada.Text_IO.Put
-                    (V.Words.Names
-                       (V.Words.Words (Next_Word).Name_Start
-                        .. V.Words.Words (Next_Word).Name_End));
-                  Ada.Text_IO.New_Line;
-               end if;
+               --  If the previous instruction had a value, just print it.
+               Safe_Col
+                 ((if Next_Cell < 0 then Word_Column else Word_Column - 1));
+               Ada.Text_IO.Put_Line (Next_Cell'Image);
             else
-               Ada.Text_IO.Put_Line ("<<INVALID>>");
+               if Cell (Word_Id'First) <= Next_Cell
+                 and then Next_Cell <= Cell (Word_Id'Last)
+               then
+                  Ada.Text_IO.Put (Next_Cell'Image);
+                  Safe_Col (Word_Column);
+                  Next_Word := Word_Id (Next_Cell);
+                  if Next_Word <= V.Words.Words_Used then
+                     Ada.Text_IO.Put
+                       (V.Words.Names
+                          (V.Words.Words (Next_Word).Name_Start
+                           .. V.Words.Words (Next_Word).Name_End));
+                     Ada.Text_IO.New_Line;
+                  end if;
+               else
+                  Ada.Text_IO.Put_Line ("<<INVALID>>");
+               end if;
             end if;
          end;
       end loop;
@@ -292,7 +305,8 @@ is
      (V         : in out VM;
       Name      : String;
       Intrinsic : Op_Intrinsic;
-      Immediate : Boolean := False) is
+      Immediate : Boolean := False;
+      Has_Value : Boolean := False) is
    begin
       if Can_Allocate_Word (V.Words)
         and then Name'Length in Word_Length
@@ -302,7 +316,8 @@ is
            (V.Words,
             Name,
             (Form => Form_Intrinsic, Intrinsic => Intrinsic),
-            Immediate);
+            Immediate,
+            Has_Value);
       else
          Stop
            (V,
@@ -315,7 +330,8 @@ is
      (V         : in out VM;
       Name      : String;
       Proc      : Op_Procedure;
-      Immediate : Boolean := False) is
+      Immediate : Boolean := False;
+      Has_Value : Boolean := False) is
    begin
       if Can_Allocate_Word (V.Words)
         and then Name'Length in Word_Length
@@ -325,7 +341,8 @@ is
            (V.Words,
             Name,
             (Form => Form_Procedure_Access, Builtin => Proc),
-            Immediate);
+            Immediate,
+            Has_Value);
       else
          Stop
            (V,
@@ -338,7 +355,8 @@ is
      (Table     : in out Word_Table;
       Name      : String;
       Code      : Word_Code;
-      Immediate : Boolean) is
+      Immediate : Boolean;
+      Has_Value : Boolean) is
    begin
       declare
          New_Word    : constant Word_Index :=
@@ -350,6 +368,7 @@ is
            Name_Index (Table.Name_Space_Used + Name_Length);
          Table.Words (New_Word).Code := Code;
          Table.Words (New_Word).Immediate := Immediate;
+         Table.WOrds (New_Word).Has_Value := Has_Value;
          Table.Names
            (Table.Name_Space_Used
             + 1

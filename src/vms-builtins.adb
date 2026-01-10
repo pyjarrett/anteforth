@@ -101,7 +101,7 @@ is
          Register (V, ";", Builtins.Semicolon'Access, Immediate => True);
          Register (V, "[", Op_Left_Bracket'Access, Immediate => True);
          Register (V, "]", Op_Right_Bracket'Access, Immediate => True);
-         Register (V, "LIT", Builtins.Op_Literal'Access);
+         Register (V, "LIT", Builtins.Op_Literal'Access, Has_Value => True);
          Register (V, "EXIT", Builtins.Op_Exit'Access);
          Register (V, "?EXIT", Builtins.Op_Conditional_Exit'Access);
       end Register_Compilation;
@@ -118,8 +118,12 @@ is
           and then Same_Address_Interpreter (V, V'Old)
       is
       begin
-         Register (V, "BRANCH", Builtins.Op_Branch'Access);
-         Register (V, "0BRANCH", Builtins.Op_Branch_If_False'Access);
+         Register (V, "BRANCH", Builtins.Op_Branch'Access, Has_Value => True);
+         Register
+           (V,
+            "0BRANCH",
+            Builtins.Op_Branch_If_False'Access,
+            Has_Value => True);
          Register (V, "IF", Builtins.Op_If'Access, Immediate => True);
          Register (V, "THEN", Builtins.Op_Then'Access, Immediate => True);
          Register (V, "ELSE", Builtins.Op_Else'Access, Immediate => True);
@@ -454,7 +458,8 @@ is
             Tk_Image,
             Code      =>
               (Form => Form_Instructions, Start => V.Num_Instructions + 1),
-            Immediate => False);
+            Immediate => False,
+            Has_Value => False);
       end;
       V.Compiling := True;
    end Colon;
