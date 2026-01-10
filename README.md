@@ -55,8 +55,8 @@ at runtime.
 * `;` - terminate a definition
 * `EXIT` - return from a function definition
 * `?EXIT` - conditional exit (returns when data stack top is 0)
-* `=`, `>`, `<` - comparison operations
-* `0=`, `0>`, `0<` - zero comparison operations
+* `=`, `<>`, `>`, `<` - comparison operations
+* `0=`, `0<>`, `0>`, `0<` - zero comparison operations
 * `IF` - two instructions written
 * `THEN`, `ELSE` - jumps are verified to be valid
 * `BEGIN`, `UNTIL`
@@ -82,29 +82,28 @@ you have 12 logical cores on your machine.
 
 ## Proof
 
-```
-=========================
+```=========================
 Summary of SPARK analysis
 =========================
 
-------------------------------------------------------------------------------------------------------------
-SPARK Analysis results        Total         Flow                              Provers   Justified   Unproved
-------------------------------------------------------------------------------------------------------------
-Data Dependencies                33           33                                    .           .          .
-Flow Dependencies                 1            1                                    .           .          .
-Initialization                   45           45                                    .           .          .
-Non-Aliasing                      .            .                                    .           .          .
-Run-time Checks                 360            .    360 (CVC5 92%, Trivial 6%, Z3 2%)           .          .
-Assertions                       34            .                            34 (CVC5)           .          .
-Functional Contracts            373            .    373 (CVC5 91%, Trivial 7%, Z3 2%)           .          .
-LSP Verification                 34            .                            34 (CVC5)           .          .
-Termination                      61           59                             2 (CVC5)           .          .
-Concurrency                       .            .                                    .           .          .
-------------------------------------------------------------------------------------------------------------
-Total                           941    138 (15%)                            803 (85%)           .          .
+------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total         Flow                                          Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                38           38                                                .           .          .
+Flow Dependencies                 1            1                                                .           .          .
+Initialization                   48           48                                                .           .          .
+Non-Aliasing                      .            .                                                .           .          .
+Run-time Checks                 370            .                       370 (CVC5 94%, Trivial 6%)           .          .
+Assertions                       34            .                                        34 (CVC5)           .          .
+Functional Contracts            391            .    391 (CVC5 90%, Trivial 7%, Z3 3%, altergo 0%)           .          .
+LSP Verification                 36            .                                        36 (CVC5)           .          .
+Termination                      61           59                                         2 (CVC5)           .          .
+Concurrency                       .            .                                                .           .          .
+------------------------------------------------------------------------------------------------------------------------
+Total                           979    146 (15%)                                        833 (85%)           .          .
 
 
-max steps used for successful proof: 19358
+max steps used for successful proof: 3783
 
 ============================
 Most difficult proved checks
@@ -204,28 +203,29 @@ in unit vms, 53 subprograms and packages out of 53 analyzed
   VMS.Step_IP at vms.ads:258 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
   VMS.Stop at vms.ads:194 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
   VMS.Word_Code at vms.ads:78 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
-in unit vms-builtins, 36 subprograms and packages out of 36 analyzed
+in unit vms-builtins, 43 subprograms and packages out of 43 analyzed
   VMS.Builtins at vms-builtins.ads:1 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
   VMS.Builtins.Colon at vms-builtins.ads:226 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
   VMS.Builtins.Comment at vms-builtins.ads:209 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
   VMS.Builtins.Op_Add at vms-builtins.ads:17 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
   VMS.Builtins.Op_Begin at vms-builtins.ads:351 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
-  VMS.Builtins.Op_Branch at vms-builtins.ads:466 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
-  VMS.Builtins.Op_Branch_If_False at vms-builtins.ads:473 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Branch at vms-builtins.ads:496 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  VMS.Builtins.Op_Branch_If_False at vms-builtins.ads:503 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
   VMS.Builtins.Op_Conditional_Exit at vms-builtins.ads:273 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (17 checks)
   VMS.Builtins.Op_Divide at vms-builtins.ads:62 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
   VMS.Builtins.Op_Drop at vms-builtins.ads:145 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
   VMS.Builtins.Op_Dupe at vms-builtins.ads:129 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
   VMS.Builtins.Op_Else at vms-builtins.ads:328 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (39 checks)
-  VMS.Builtins.Op_Equal at vms-builtins.ads:420 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  VMS.Builtins.Op_Equal at vms-builtins.ads:435 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
   VMS.Builtins.Op_Exit at vms-builtins.ads:258 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
-  VMS.Builtins.Op_Greater_than at vms-builtins.ads:450 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  VMS.Builtins.Op_Greater_than at vms-builtins.ads:480 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
   VMS.Builtins.Op_If at vms-builtins.ads:294 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
   VMS.Builtins.Op_Left_Bracket at vms-builtins.ads:216 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
-  VMS.Builtins.Op_Less_than at vms-builtins.ads:435 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  VMS.Builtins.Op_Less_than at vms-builtins.ads:465 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
   VMS.Builtins.Op_Literal at vms-builtins.ads:192 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
   VMS.Builtins.Op_Multiply at vms-builtins.ads:48 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
   VMS.Builtins.Op_Negate at vms-builtins.ads:76 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Not_Equal at vms-builtins.ads:450 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
   VMS.Builtins.Op_Over at vms-builtins.ads:98 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
   VMS.Builtins.Op_Push_From_Return_Stack at vms-builtins.ads:174 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
   VMS.Builtins.Op_Push_To_Return_Stack at vms-builtins.ads:156 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
@@ -236,9 +236,15 @@ in unit vms-builtins, 36 subprograms and packages out of 36 analyzed
   VMS.Builtins.Op_Then at vms-builtins.ads:306 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
   VMS.Builtins.Op_Until at vms-builtins.ads:364 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
   VMS.Builtins.Op_Zero_Equal at vms-builtins.ads:375 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
-  VMS.Builtins.Op_Zero_Greater_than at vms-builtins.ads:405 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
-  VMS.Builtins.Op_Zero_Less_than at vms-builtins.ads:390 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Zero_Greater_than at vms-builtins.ads:420 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Zero_Less_than at vms-builtins.ads:405 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  VMS.Builtins.Op_Zero_Not_Equal at vms-builtins.ads:390 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
   VMS.Builtins.Recurse at vms-builtins.ads:244 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
-  VMS.Builtins.Register_Builtins at vms-builtins.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (109 checks)
+  VMS.Builtins.Register_Builtins at vms-builtins.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  VMS.Builtins.Register_Builtins.Register_Comparison at vms-builtins.adb:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (37 checks)
+  VMS.Builtins.Register_Builtins.Register_Compilation at vms-builtins.adb:87 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (25 checks)
+  VMS.Builtins.Register_Builtins.Register_Control_Flow at vms-builtins.adb:109 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (25 checks)
+  VMS.Builtins.Register_Builtins.Register_Intrinsics at vms-builtins.adb:17 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  VMS.Builtins.Register_Builtins.Register_Stack_Ops at vms-builtins.adb:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (25 checks)
   VMS.Builtins.Semicolon at vms-builtins.ads:236 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
 ```
