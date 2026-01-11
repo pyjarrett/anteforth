@@ -42,7 +42,8 @@ is
         others                   =>
           ((Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1
             and then Param_Peek (V)
-                     = Param_Peek (V'Old, 1) - Param_Peek (V'Old, 0))
+                     = Param_Peek (V'Old, 1) - Param_Peek (V'Old, 0)
+            and then Only_Param_Stack_Changed (V, V'Old))
            or else (V.Status = Value_Out_Of_Bounds)));
 
    procedure Op_Multiply (V : in out VM)
@@ -52,11 +53,12 @@ is
      Contract_Cases =>
        (Param_Stack_Size (V) < 2 =>
           V.Status = Param_Stack_Underflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         others                   =>
           ((Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1
             and then Param_Peek (V)
-                     = Param_Peek (V'Old, 1) * Param_Peek (V'Old, 0))
+                     = Param_Peek (V'Old, 1) * Param_Peek (V'Old, 0)
+            and then Only_Param_Stack_Changed (V, V'Old))
            or else (V.Status = Value_Out_Of_Bounds)));
 
    procedure Op_Divide (V : in out VM)
@@ -66,11 +68,12 @@ is
      Contract_Cases =>
        (Param_Stack_Size (V) < 2 =>
           V.Status = Param_Stack_Underflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         others                   =>
           ((Param_Stack_Size (V) = Param_Stack_Size (V'Old) - 1
             and then Param_Peek (V)
-                     = Param_Peek (V'Old, 1) / Param_Peek (V'Old, 0))
+                     = Param_Peek (V'Old, 1) / Param_Peek (V'Old, 0)
+            and then Only_Param_Stack_Changed (V, V'Old))
            or else (V.Status = Value_Out_Of_Bounds)));
 
    procedure Op_Negate (V : in out VM)
@@ -80,20 +83,24 @@ is
      Contract_Cases =>
        (Param_Stack_Size (V) = 0 =>
           V.Status = Param_Stack_Underflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         others                   =>
           (Param_Stack_Size (V) = Param_Stack_Size (V'Old)
-           and then Param_Peek (V) = -Param_Peek (V'Old)));
+           and then Param_Peek (V) = -Param_Peek (V'Old))
+          and then Only_Param_Stack_Changed (V, V'Old));
 
    procedure Op_Swap (V : in out VM)
    with
      Global         => null,
      Pre            => Is_Running (V),
      Contract_Cases =>
-       (Param_Stack_Size (V) < 2 => V.Status = Param_Stack_Underflow,
+       (Param_Stack_Size (V) < 2 =>
+          V.Status = Param_Stack_Underflow
+          and then Only_Status_Changed (V, V'Old),
         others                   =>
           Param_Peek (V, 0) = Param_Peek (V'Old, 1)
-          and then Param_Peek (V, 1) = Param_Peek (V'Old, 0));
+          and then Param_Peek (V, 1) = Param_Peek (V'Old, 0)
+          and then Only_Param_Stack_Changed (V, V'Old));
 
    procedure Op_Over (V : in out VM)
    with
@@ -102,15 +109,16 @@ is
      Contract_Cases =>
        (Param_Stack_Size (V) < 2                    =>
           V.Status = Param_Stack_Underflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         Param_Stack_Size (V) = Max_Param_Stack_Size =>
           V.Status = Param_Stack_Overflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         others                                      =>
           (Param_Stack_Size (V) = Param_Stack_Size (V'Old) + 1
            and then Param_Peek (V, 0) = Param_Peek (V'Old, 1)
            and then Param_Peek (V, 1) = Param_Peek (V'Old, 0)
-           and then Param_Peek (V, 2) = Param_Peek (V'Old, 1)));
+           and then Param_Peek (V, 2) = Param_Peek (V'Old, 1))
+          and then Only_Param_Stack_Changed (V, V'Old));
 
    procedure Op_Rotate (V : in out VM)
    with
@@ -119,7 +127,7 @@ is
      Contract_Cases =>
        (Param_Stack_Size (V) < 3 =>
           V.Status = Param_Stack_Underflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         others                   =>
           (Param_Stack_Size (V) = Param_Stack_Size (V'Old)
            and then Param_Peek (V, 0) = Param_Peek (V'Old, 2)
@@ -134,21 +142,24 @@ is
      Contract_Cases =>
        (Param_Stack_Size (V) = Max_Param_Stack_Size =>
           V.Status = Param_Stack_Overflow
-          and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
+          and then Only_Status_Changed (V, V'Old),
         Param_Stack_Size (V) = 0                    =>
           V.Status = Param_Stack_Underflow
           and then Param_Stack_Size (V) = Param_Stack_Size (V'Old),
         others                                      =>
           (Param_Stack_Size (V) = Param_Stack_Size (V'Old) + 1
            and then Param_Peek (V, 0) = Param_Peek (V'Old, 0)
-           and then Param_Peek (V, 1) = Param_Peek (V'Old, 0)));
+           and then Param_Peek (V, 1) = Param_Peek (V'Old, 0)
+           and then Only_Param_Stack_Changed (V, V'Old)));
 
    procedure Op_Drop (V : in out VM)
    with
      Global         => null,
      Pre            => Is_Running (V),
      Contract_Cases =>
-       (Param_Stack_Size (V) = 0 => V.Status = Param_Stack_Underflow,
+       (Param_Stack_Size (V) = 0 =>
+          V.Status = Param_Stack_Underflow
+          and then Only_Status_Changed (V, V'Old),
         others                   =>
           V.Status = V'Old.Status
           and then (for all X in 0 .. Param_Stack_Size (V) - 1 =>
