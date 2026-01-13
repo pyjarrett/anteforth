@@ -395,11 +395,12 @@ is
    end Allocate_Word;
 
    function Lookup (Table : Word_Table; Name : String) return Word_Id is
+      Normalized : constant String := Ada.Characters.Handling.To_Upper (Name);
    begin
       for Index in reverse Word_Index'First .. Table.Words_Used loop
          if Table.Names
               (Table.Words (Index).Name_Start .. Table.Words (Index).Name_End)
-           = Name
+           = Normalized
          then
             return Index;
          end if;

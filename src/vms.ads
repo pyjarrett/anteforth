@@ -90,7 +90,11 @@ is
 
    overriding
    function "=" (A, B : Word_Code) return Boolean
-   is (A.Form = B.Form);
+   is (A.Form = B.Form
+       and then (case A.Form is
+                   when Form_Intrinsic        => A.Intrinsic = B.Intrinsic,
+                   when Form_Procedure_Access => A.Builtin = B.Builtin,
+                   when Form_Instructions     => A.Start = B.Start));
 
    subtype Word_Length is Positive range 1 .. Max_Word_Length;
    subtype Word_Id is Positive;
