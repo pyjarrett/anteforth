@@ -209,6 +209,9 @@ is
        and then V.Error_Length = Message'Length
        and then Only_Status_Changed (V, V'Old);
 
+   function Error_Message (V : VM) return String
+   is (V.Error (V.Error'First .. V.Error'First + V.Error_Length));
+
    ---------------------------------------------------------------------------
    --  Compilation
    ---------------------------------------------------------------------------

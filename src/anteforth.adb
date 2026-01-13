@@ -42,6 +42,10 @@ procedure Anteforth with SPARK_Mode => Off is
                   Ada.Text_IO.New_Line;
                   VMS.Dump_VM (V);
                   Ada.Text_IO.New_Line;
+                  Ada.Text_IO.Put_Line
+                    ("----- Error: " & VMS.Error_Message (V) & "-----");
+                  Ada.Text_IO.Put_Line
+                    ("Use RESET to clear error and continue.");
                end if;
             else
                Ada.Text_IO.Put_Line ("Input line too long!");
