@@ -13,6 +13,7 @@ is
    Max_Instructions : constant := 1_024 * 5;
 
    Max_Error_Message_Length : constant := 256;
+   subtype Error_Message_Length is Natural range 0 .. Max_Error_Message_Length;
 
    type VM_Status is
      (Ok,
@@ -93,7 +94,8 @@ is
    is (A.Form = B.Form
        and then (case A.Form is
                    when Form_Intrinsic        => A.Intrinsic = B.Intrinsic,
-                   when Form_Procedure_Access => A.Builtin = B.Builtin,
+                   when Form_Procedure_Access =>
+                     True, --  Can't do equality on access types,
                    when Form_Instructions     => A.Start = B.Start));
 
    subtype Word_Length is Positive range 1 .. Max_Word_Length;
@@ -151,7 +153,7 @@ is
       Status : VM_Status := Ok;
 
       Error        : String (1 .. Max_Error_Message_Length) := [others => ' '];
-      Error_Length : Natural := 0;
+      Error_Length : Error_Message_Length := 0;
 
       --  Index of the top of the parameter stack.  If 0, then the stack is empty.
       Param_Top : Param_Count := 0;
@@ -210,7 +212,7 @@ is
        and then Only_Status_Changed (V, V'Old);
 
    function Error_Message (V : VM) return String
-   is (V.Error (V.Error'First .. V.Error'First + V.Error_Length));
+   is (V.Error (V.Error'First .. V.Error_Length));
 
    ---------------------------------------------------------------------------
    --  Compilation
