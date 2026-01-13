@@ -133,6 +133,8 @@ is
            and then Param_Peek (V, 0) = Param_Peek (V'Old, 2)
            and then Param_Peek (V, 1) = Param_Peek (V'Old, 0)
            and then Param_Peek (V, 2) = Param_Peek (V'Old, 1)
+           and then Param_Stack_Equal_From_Bottom_Until
+                      (V, V'Old, V.Param_Top - 3)
            and then Only_Param_Stack_Changed (V, V'Old)));
 
    procedure Op_Dupe (V : in out VM)

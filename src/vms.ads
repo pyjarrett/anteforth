@@ -90,7 +90,7 @@ is
 
    overriding
    function "=" (A, B : Word_Code) return Boolean
-   is (True);
+   is (A.Form = B.Form);
 
    subtype Word_Length is Positive range 1 .. Max_Word_Length;
    subtype Word_Id is Positive;
