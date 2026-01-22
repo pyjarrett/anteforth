@@ -1,5 +1,3 @@
-with Ada.Text_IO;
-
 package body VMS.Builtins
   with SPARK_Mode => On
 is
@@ -61,6 +59,21 @@ is
          Register (V, "*", Builtins.Op_Multiply'Access);
          Register (V, "/", Builtins.Op_Divide'Access);
       end Register_Comparison;
+
+      procedure Register_Boolean_Operators (V : in out VM)
+      with
+        Global => null,
+        Post   =>
+          Same_State (V, V'Old)
+          and then Same_TIB (V, V'Old)
+          and then Same_Params (V, V'Old)
+          and then Same_Returns (V, V'Old)
+          and then Same_Instructions (V, V'Old)
+          and then Same_Address_Interpreter (V, V'Old)
+      is
+      begin
+         Register (V, "AND", Builtins.Op_And'Access);
+      end Register_Boolean_Operators;
 
       procedure Register_Stack_Ops (V : in out VM)
       with
@@ -135,6 +148,7 @@ is
    begin
       Register_Intrinsics (V);
       Register_Comparison (V);
+      Register_Boolean_Operators (V);
       Register_Stack_Ops (V);
       Register_Compilation (V);
       Register_Control_Flow (V);
@@ -227,6 +241,37 @@ is
          V.Status := Value_Out_Of_Bounds;
       end if;
    end Op_Divide;
+
+   ----------------------------------------------------------------------------
+   --  We can only do bitwise operations on a modulo type, so convert with
+   --  two's complement to do boolean operations.
+   type Bits is mod 2 ** 64;
+   Bit_Width_Value : constant := Cell'Last + 1;
+   function Cell_To_Bits (C : Cell) return Bits
+   is (if C < 0
+       then Bits (Bit_Width_Value - Unbounded_Value (C))
+       else Bits (C));
+
+   function Bits_To_Cell (B : Bits) return Cell
+   is (if B <= Bits (Cell'Last) then Cell (B) else Cell (Bit_Width_Value - B));
+   ----------------------------------------------------------------------------
+
+   procedure Op_And (V : in out VM) is
+      Left, Right : Bits;
+      Result      : Bits;
+   begin
+      if Param_Stack_Size (V) < 2 then
+         V.Status := Param_Stack_Underflow;
+         return;
+      end if;
+
+      Right := Cell_To_Bits (Param_Peek (V, 0));
+      Left := Cell_To_Bits (Param_Peek (V, 1));
+      Result := Right and Left;
+
+      Param_Multipop (V, 2);
+      Param_Push (V, Bits_To_Cell (Result));
+   end Op_And;
 
    procedure Op_Negate (V : in out VM) is
       Element : Unbounded_Value;
