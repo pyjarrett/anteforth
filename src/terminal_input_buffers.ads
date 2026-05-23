@@ -263,10 +263,6 @@ private
                  then
                    Remaining_Characters (Self)
                    < Remaining_Characters (Self'Old))
-       and then ((Skipped_Whitespace
-                  and then Remaining_Characters (Self)
-                           < Remaining_Characters (Self'Old))
-                 or else (not Skipped_Whitespace))
        and then (if not Skipped_Whitespace
                  then
                    Remaining_Characters (Self)
