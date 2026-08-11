@@ -85,9 +85,14 @@ is
           V.Status = Param_Stack_Underflow
           and then Only_Status_Changed (V, V'Old),
         others                   =>
-          (Param_Stack_Size (V) = Param_Stack_Size (V'Old)
-           and then Param_Peek (V) = -Param_Peek (V'Old))
-          and then Only_Param_Stack_Changed (V, V'Old));
+          Param_Stack_Size (V) = Param_Stack_Size (V'Old)
+          and then
+            ((Param_Peek (V'Old) = Cell'First
+              and then Only_Status_Changed (V, V'Old)
+              and then V.Status = Value_Out_Of_Bounds)
+             or else
+               (Param_Peek (V) = -Param_Peek (V'Old)
+                and then Only_Param_Stack_Changed (V, V'Old))));
 
    procedure Op_Swap (V : in out VM)
    with

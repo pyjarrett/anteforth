@@ -229,7 +229,7 @@ is
    end Op_Divide;
 
    procedure Op_Negate (V : in out VM) is
-      Element : Unbounded_Value;
+      Element : Cell;
    begin
       if Param_Stack_Size (V) = 0 then
          V.Status := Param_Stack_Underflow;
@@ -237,8 +237,14 @@ is
       end if;
 
       Element := Param_Peek (V);
-      Param_Multipop (V, 1);
-      Param_Push (V, -Element);
+
+      --  Cell values are lopsided since they mimic 32-bit two's complement values.
+      if Element = Cell'First then
+         V.Status := Value_Out_Of_Bounds;
+      else
+         Param_Multipop (V, 1);
+         Param_Push (V, -Element);
+      end if;
    end Op_Negate;
 
    procedure Op_Swap (V : in out VM) is

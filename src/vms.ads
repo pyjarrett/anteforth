@@ -30,7 +30,7 @@ is
       Syntax_Error);
 
    type Unbounded_Value is new Interfaces.Integer_64;
-   subtype Cell is Unbounded_Value range -2**31 .. 2**31;
+   subtype Cell is Unbounded_Value range -2 ** 31 .. 2 ** 31 - 1;
    subtype Bounded_Value is Cell;
    type Cell_Array is array (Positive range <>) of Cell;
 
